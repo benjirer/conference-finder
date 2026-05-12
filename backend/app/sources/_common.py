@@ -60,6 +60,49 @@ def normalize_tier(raw) -> str | None:
     return _TIER_MAP.get(s)
 
 
+# ────────────────────────── acronym canonicalisation ──────────────────────────
+# Different aggregators use different conventions for the same venue:
+#   "NSDI"     vs "USENIX NSDI"
+#   "ATC"      vs "USENIX ATC"
+#   "ICSE"     vs "ACM/IEEE ICSE"
+# We pick a canonical short form for each and rewrite at ingest so the
+# `(acronym, year, round)` unique key actually does its job.
+_ALIASES: dict[str, str] = {
+    "usenix nsdi":   "NSDI",
+    "usenix atc":    "ATC",
+    "usenix osdi":   "OSDI",
+    "usenix fast":   "FAST",
+    "usenix sec":    "USENIX Security",
+    "ieee icdcs":    "ICDCS",
+    "ieee icde":     "ICDE",
+    "ieee infocom":  "INFOCOM",
+    "ieee icassp":   "ICASSP",
+    "ieee s&p":      "S&P",
+    "ieee sp":       "S&P",
+    "acm/ieee icse": "ICSE",
+    "acm icse":      "ICSE",
+    "acm mobicom":   "MobiCom",
+    "acm sigmod":    "SIGMOD",
+    "acm sigcomm":   "SIGCOMM",
+    "acm podc":      "PODC",
+    "acm mm":        "MM",
+    "acm css":       "CCS",
+    "acm ccs":       "CCS",
+    "acm-sigcomm":   "SIGCOMM",
+    "icml":          "ICML",
+    "ndss":          "NDSS",
+}
+
+
+def canonical_acronym(raw: str | None) -> str | None:
+    """Map a heterogeneous source-supplied acronym to its canonical short form.
+    Case-insensitive lookup; falls back to the input if no alias matches."""
+    if not raw:
+        return raw
+    s = " ".join(str(raw).split())  # collapse whitespace
+    return _ALIASES.get(s.lower(), s)
+
+
 def min_year() -> int:
     """Earliest conference year worth keeping. Anything older is pruned on
     ingest and dropped from the canonical / source_records tables by the
@@ -154,6 +197,7 @@ def parse_date_range(date_str: str | None, year: int) -> tuple[datetime | None, 
 
 def upsert_source_record(
     db, *, acronym: str, year: int, source: str,
+    round: int = 1,
     name: str | None = None, link: str | None = None,
     abstract_deadline: datetime | None = None,
     submission_deadline: datetime | None = None,
@@ -170,14 +214,15 @@ def upsert_source_record(
     (`min_year()`) — keeps the source_records table tidy."""
     if year < min_year():
         return None
+    acronym = canonical_acronym(acronym)
     row = (
         db.query(SourceRecord)
-        .filter_by(acronym=acronym, year=year, source=source)
+        .filter_by(acronym=acronym, year=year, source=source, round=round)
         .one_or_none()
     )
     if row is None:
         row = SourceRecord(
-            acronym=acronym, year=year, source=source,
+            acronym=acronym, year=year, source=source, round=round,
             fetched_at=datetime.utcnow(),
         )
         db.add(row)
@@ -196,6 +241,8 @@ def upsert_source_record(
 
 def upsert_conference_secondary(
     db, *, acronym: str, year: int, name: str,
+    round: int = 1,
+    rounds_total: int | None = None,
     areas: list[str] | None = None,
     abstract_deadline: datetime | None = None,
     submission_deadline: datetime | None = None,
@@ -224,19 +271,32 @@ def upsert_conference_secondary(
     """
     if year < min_year():
         return False
-    row = db.query(Conference).filter_by(acronym=acronym, year=year).one_or_none()
+    acronym = canonical_acronym(acronym)
+    row = db.query(Conference).filter_by(acronym=acronym, year=year, round=round).one_or_none()
     if row is not None:
-        # Existing row — don't overwrite its dates/source, but backfill tier
-        # and h5_index when they're empty so secondary aggregators can still
-        # contribute these metadata fields.
+        # Existing row — don't overwrite the canonical source's data, but
+        # backfill any field that's still null. Lets confsearch contribute
+        # notification dates to a ccfddl-claimed row, aideadlines contribute
+        # abstract deadlines, etc.
         new_tier = normalize_tier(tier)
         if row.tier is None and new_tier is not None:
             row.tier = new_tier
         if row.h5_index is None and h5_index is not None:
             row.h5_index = h5_index
+        if row.abstract_deadline is None and abstract_deadline is not None:
+            row.abstract_deadline = abstract_deadline
+        if row.notification_date is None and notification_date is not None:
+            row.notification_date = notification_date
+        if row.conference_start is None and conference_start is not None:
+            row.conference_start = conference_start
+        if row.conference_end is None and conference_end is not None:
+            row.conference_end = conference_end
+        if row.location is None and location:
+            row.location = location
         return False
     row = Conference(
         acronym=acronym, year=year, name=name,
+        round=round, rounds_total=rounds_total,
         areas=json.dumps(areas or []),
         abstract_deadline=abstract_deadline,
         submission_deadline=submission_deadline,

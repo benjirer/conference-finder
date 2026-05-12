@@ -155,7 +155,7 @@ def ingest_all() -> dict[str, int]:
             if not data:
                 errors += 1
                 continue
-            acronym = data.get("title", "").strip()
+            acronym = _common.canonical_acronym(data.get("title", "").strip())
             name = data.get("description", "").strip() or acronym
             confs = data.get("confs", []) or []
             # Keep entries whose conference_end is within the future, or the
@@ -169,39 +169,48 @@ def ingest_all() -> dict[str, int]:
                 if year < _common.min_year():
                     continue
                 tz = cf.get("timezone")
-                timeline = (cf.get("timeline") or [{}])[0]
-                abstract = _to_utc(_parse_ts(timeline.get("abstract_deadline")), tz)
-                deadline = _to_utc(_parse_ts(timeline.get("deadline")), tz)
+                # ccfddl's `timeline` is a list — venues with multiple review
+                # cycles (CoNEXT, SIGMETRICS, …) list one entry per round.
+                timeline_list = cf.get("timeline") or [{}]
+                rounds_total = len(timeline_list) if len(timeline_list) > 1 else None
                 start, end = _parse_conf_date_range(cf.get("date"), year)
-                row = db.query(Conference).filter_by(acronym=acronym, year=year).one_or_none()
-                if row is None:
-                    row = Conference(acronym=acronym, year=year, name=name)
-                    db.add(row)
-                row.name = name
-                row.areas = json.dumps(meta.get("areas", []))
-                # Tier: VENUE_MAP override > ccfddl-supplied rank.core/ccf > existing.
-                row.tier = meta.get("tier") or _common.normalize_tier(data.get("rank")) or row.tier
-                row.abstract_deadline = abstract
-                row.submission_deadline = deadline
-                row.conference_start = start
-                row.conference_end = end
-                row.timezone = tz
-                row.location = cf.get("place")
-                row.website = cf.get("link")
-                row.cfp_url = cf.get("link")
-                row.source = "ccfddl"
-                row.last_verified = now
-                row.is_workshop = False
-                upserted += 1
+                for idx, tl in enumerate(timeline_list, start=1):
+                    abstract = _to_utc(_parse_ts(tl.get("abstract_deadline")), tz)
+                    deadline = _to_utc(_parse_ts(tl.get("deadline")), tz)
+                    row = (
+                        db.query(Conference)
+                        .filter_by(acronym=acronym, year=year, round=idx)
+                        .one_or_none()
+                    )
+                    if row is None:
+                        row = Conference(acronym=acronym, year=year, round=idx, name=name)
+                        db.add(row)
+                        db.flush()
+                    row.name = name
+                    row.rounds_total = rounds_total
+                    row.areas = json.dumps(meta.get("areas", []))
+                    row.tier = meta.get("tier") or _common.normalize_tier(data.get("rank")) or row.tier
+                    row.abstract_deadline = abstract
+                    row.submission_deadline = deadline
+                    row.conference_start = start
+                    row.conference_end = end
+                    row.timezone = tz
+                    row.location = cf.get("place")
+                    row.website = cf.get("link")
+                    row.cfp_url = cf.get("link")
+                    row.source = "ccfddl"
+                    row.last_verified = now
+                    row.is_workshop = False
+                    upserted += 1
 
-                _common.upsert_source_record(
-                    db,
-                    acronym=acronym, year=year, source="ccfddl",
-                    name=name, link=cf.get("link"),
-                    abstract_deadline=abstract,
-                    submission_deadline=deadline,
-                    conference_start=start, conference_end=end,
-                    location=cf.get("place"),
-                )
+                    _common.upsert_source_record(
+                        db,
+                        acronym=acronym, year=year, source="ccfddl", round=idx,
+                        name=name, link=cf.get("link"),
+                        abstract_deadline=abstract,
+                        submission_deadline=deadline,
+                        conference_start=start, conference_end=end,
+                        location=cf.get("place"),
+                    )
         db.commit()
     return {"upserted": upserted, "errors": errors}

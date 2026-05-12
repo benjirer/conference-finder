@@ -1,0 +1,2152 @@
+entries:
+- acronym: POPL
+  year: 2025
+  extracted_at: '2026-05-12T22:55:08'
+  cfp_url: https://conf.researchr.org/home/POPL-2025
+  conference_start: '2025-01-19'
+  conference_end: '2025-01-25'
+  location: Denver, Colorado
+- acronym: WSDM
+  year: 2025
+  extracted_at: '2026-05-12T22:55:14'
+  cfp_url: https://www.wsdm-conference.org/2025/
+  abstract_deadline: '2024-08-07'
+  submission_deadline: '2024-08-14'
+  notification_date: '2024-10-23'
+  camera_ready: '2024-12-18'
+  conference_start: '2025-03-10'
+  conference_end: '2025-03-14'
+  location: Hannover, Germany
+- acronym: AAAI
+  year: 2025
+  extracted_at: '2026-05-12T22:55:18'
+  cfp_url: https://aaai.org/conference/aaai/aaai-25/
+  abstract_deadline: '2024-08-07'
+  submission_deadline: '2024-08-15'
+  notification_date: '2024-12-09'
+  camera_ready: '2024-12-19'
+  conference_start: '2025-02-25'
+  conference_end: '2025-03-04'
+  location: Philadelphia, Pennsylvania, USA
+- acronym: PPoPP
+  year: 2025
+  extracted_at: '2026-05-12T22:55:21'
+  cfp_url: https://ppopp25.sigplan.org/
+  conference_start: '2025-03-01'
+  conference_end: '2025-03-05'
+  diverged_fields:
+  - location
+- acronym: CCNC
+  year: 2025
+  extracted_at: '2026-05-12T22:55:26'
+  cfp_url: https://ieee-ccnc.org/
+  submission_deadline: '2026-07-01'
+  notification_date: '2026-07-31'
+  camera_ready: '2026-08-31'
+  conference_start: '2027-01-09'
+  conference_end: '2027-01-12'
+  page_limit: 6
+  location: Las Vegas, NV, USA
+- acronym: MobiCom
+  year: 2025
+  extracted_at: '2026-05-12T22:55:33'
+  cfp_url: https://sigmobile.org/mobicom/2025/
+  rounds:
+  - round: 1
+    abstract_deadline: '2024-08-29'
+    submission_deadline: '2024-09-05'
+    notification_date: '2024-12-10'
+    camera_ready: null
+  - round: 2
+    abstract_deadline: '2025-03-11'
+    submission_deadline: '2025-03-18'
+    notification_date: '2025-06-24'
+    camera_ready: null
+  model: sonnet
+- acronym: ICASSP
+  year: 2025
+  extracted_at: '2026-05-12T22:55:38'
+  cfp_url: https://2025.ieeeicassp.org
+  location: Hyderabad, India
+  model: sonnet
+- acronym: WACV
+  year: 2025
+  extracted_at: '2026-05-12T22:55:43'
+  cfp_url: https://wacv2025.thecvf.com/
+  conference_start: '2025-02-28'
+  conference_end: '2025-03-04'
+  rounds:
+  - round: 1
+    abstract_deadline: null
+    submission_deadline: '2025-07-15'
+    notification_date: '2025-10-28'
+    camera_ready: null
+  - round: 2
+    abstract_deadline: null
+    submission_deadline: '2025-09-09'
+    notification_date: '2025-10-28'
+    camera_ready: null
+  diverged_fields:
+  - submission_deadline
+  - notification_date
+  - location
+- acronym: CHI
+  year: 2025
+  extracted_at: '2026-05-12T22:55:50'
+  cfp_url: https://chi2025.acm.org/
+  conference_start: '2025-04-26'
+  conference_end: '2025-05-01'
+  location: Yokohama, Japan
+  rounds:
+  - round: 1
+    name: Papers
+    abstract_deadline: null
+    submission_deadline: '2024-10-10'
+    notification_date: '2024-11-28'
+    camera_ready: null
+  - round: 2
+    name: Submission
+    abstract_deadline: null
+    submission_deadline: '2024-09-12'
+    notification_date: '2025-01-16'
+    camera_ready: null
+  - round: 3
+    name: Case Studies of HCI in Practice, Courses, Workshops
+    abstract_deadline: null
+    submission_deadline: '2024-10-24'
+    notification_date: '2024-12-05'
+    camera_ready: null
+  - round: 4
+    name: In-Person Doctoral Consortium
+    abstract_deadline: null
+    submission_deadline: '2024-12-05'
+    notification_date: '2025-01-30'
+    camera_ready: null
+  - round: 5
+    name: alt.CHI, Panel, SIG
+    abstract_deadline: null
+    submission_deadline: '2024-12-19'
+    notification_date: '2025-01-16'
+    camera_ready: null
+  - round: 6
+    name: Journal
+    abstract_deadline: null
+    submission_deadline: '2025-01-22'
+    notification_date: '2025-01-27'
+    camera_ready: null
+  - round: 7
+    name: Student Volunteer
+    abstract_deadline: null
+    submission_deadline: '2025-01-23'
+    notification_date: '2025-02-20'
+    camera_ready: null
+  diverged_fields:
+  - submission_deadline
+  - notification_date
+- acronym: COLING
+  year: 2025
+  extracted_at: '2026-05-12T22:55:55'
+  cfp_url: https://coling2025.org/
+  submission_deadline: '2024-09-16'
+  notification_date: '2024-11-29'
+  camera_ready: '2024-12-15'
+  conference_start: '2025-01-19'
+  location: Abu Dhabi, UAE
+  rounds:
+  - round: 1
+    abstract_deadline: null
+    submission_deadline: '2024-09-16'
+    notification_date: '2024-11-29'
+    camera_ready: '2024-12-15'
+  - round: 2
+    abstract_deadline: null
+    submission_deadline: '2024-10-20'
+    notification_date: '2024-11-29'
+    camera_ready: '2024-12-15'
+  diverged_fields:
+  - conference_end
+- acronym: DATE
+  year: 2025
+  extracted_at: '2026-05-12T22:56:00'
+  cfp_url: https://www.date-conference.com/
+  conference_start: '2026-04-20'
+  conference_end: '2026-04-22'
+  location: Verona, Italy
+- acronym: ICLR
+  year: 2025
+  extracted_at: '2026-05-12T22:56:04'
+  cfp_url: https://iclr.cc/Conferences/2025
+  submission_deadline: '2024-10-01'
+  camera_ready: '2025-03-14'
+  conference_start: '2025-04-24'
+  conference_end: '2025-04-28'
+  location: Singapore
+- acronym: FPGA
+  year: 2025
+  extracted_at: '2026-05-12T22:56:08'
+  cfp_url: https://www.isfpga.org
+  abstract_deadline: '2025-09-24'
+  submission_deadline: '2025-10-01'
+  notification_date: '2025-11-23'
+  camera_ready: '2025-12-10'
+  conference_start: '2026-02-22'
+  conference_end: '2026-02-24'
+  location: Monterey, California, USA
+- acronym: SIGMETRICS
+  year: 2025
+  extracted_at: '2026-05-12T22:56:13'
+  cfp_url: https://www.sigmetrics.org/sigmetrics2025/
+  conference_start: '2025-06-09'
+  conference_end: '2025-06-13'
+  diverged_fields:
+  - location
+- acronym: IPDPS
+  year: 2025
+  extracted_at: '2026-05-12T22:56:18'
+  cfp_url: https://www.ipdps.org/
+  conference_start: '2026-05-25'
+  conference_end: '2026-05-29'
+  location: New Orleans, USA
+- acronym: ECIR
+  year: 2025
+  extracted_at: '2026-05-12T22:56:27'
+  cfp_url: https://ecir2025.eu/
+  conference_start: '2025-04-06'
+  conference_end: '2025-04-10'
+  location: Lucca, Italy
+- acronym: AISTATS
+  year: 2025
+  extracted_at: '2026-05-12T22:56:30'
+  cfp_url: https://aistats.org/aistats2025
+  conference_start: '2025-05-03'
+  conference_end: '2025-05-05'
+  location: Mai Khao, Thailand
+- acronym: ISCAS
+  year: 2025
+  extracted_at: '2026-05-12T22:56:37'
+  cfp_url: https://2025.ieee-iscas.org/
+  submission_deadline: '2024-10-28'
+  notification_date: '2025-01-20'
+  camera_ready: '2025-02-10'
+  conference_start: '2025-05-25'
+  conference_end: '2025-05-28'
+  location: London, United Kingdom
+- acronym: WCNC
+  year: 2025
+  extracted_at: '2026-05-12T22:56:43'
+  cfp_url: http://www.ieee-wcnc.org/
+  notification_date: '2026-01-11'
+  camera_ready: '2026-02-07'
+  conference_start: '2026-04-13'
+  conference_end: '2026-04-16'
+  location: Kuala Lumpur, Malaysia
+- acronym: NAACL
+  year: 2025
+  extracted_at: '2026-05-12T22:56:46'
+  cfp_url: https://2025.naacl.org/
+  submission_deadline: '2024-10-15'
+  diverged_fields:
+  - conference_start
+  - conference_end
+- acronym: SIGMOD
+  year: 2025
+  extracted_at: '2026-05-12T22:56:51'
+  cfp_url: https://2025.sigmod.org/
+  conference_start: '2025-06-22'
+  conference_end: '2025-06-27'
+  location: Berlin, Germany
+- acronym: MLSys
+  year: 2025
+  extracted_at: '2026-05-12T22:56:56'
+  cfp_url: https://mlsys.org/
+  submission_deadline: '2025-10-30'
+  notification_date: '2026-01-26'
+  conference_start: '2026-05-18'
+  conference_end: '2026-05-22'
+  diverged_fields:
+  - location
+- acronym: SCC
+  year: 2025
+  extracted_at: '2026-05-12T22:57:00'
+  cfp_url: https://www.scc2025.net/
+  submission_deadline: '2024-11-04'
+  notification_date: '2024-12-18'
+  camera_ready: '2025-01-22'
+  location: Karlsruhe, Germany
+- acronym: STOC
+  year: 2025
+  extracted_at: '2026-05-12T22:57:08'
+  cfp_url: http://acm-stoc.org/
+  conference_start: '2026-06-22'
+  conference_end: '2026-06-26'
+  location: Salt Lake City, USA
+  model: sonnet
+- acronym: CVPR
+  year: 2025
+  extracted_at: '2026-05-12T22:57:14'
+  cfp_url: https://cvpr.thecvf.com/
+  abstract_deadline: '2025-11-07'
+  submission_deadline: '2025-11-13'
+  conference_start: '2026-06-03'
+  conference_end: '2026-06-07'
+  diverged_fields:
+  - location
+- acronym: PLDI
+  year: 2025
+  extracted_at: '2026-05-12T22:57:17'
+  cfp_url: https://pldi25.sigplan.org/
+  conference_start: '2025-06-18'
+  conference_end: '2025-06-20'
+  location: Seoul, South Korea
+- acronym: IMC
+  year: 2025
+  extracted_at: '2026-05-12T22:57:22'
+  cfp_url: https://conferences.sigcomm.org/imc/2025/
+  conference_start: '2025-10-28'
+  conference_end: '2025-10-31'
+  rounds:
+  - round: 1
+    abstract_deadline: '2024-11-14'
+    submission_deadline: '2024-11-21'
+    notification_date: '2025-03-26'
+    camera_ready: '2025-04-26'
+  - round: 2
+    abstract_deadline: '2025-05-08'
+    submission_deadline: '2025-05-15'
+    notification_date: '2025-08-18'
+    camera_ready: '2025-09-30'
+  diverged_fields:
+  - location
+- acronym: ICDE
+  year: 2025
+  extracted_at: '2026-05-12T22:57:25'
+  cfp_url: https://ieee-icde.org/2025/
+  conference_start: '2025-05-19'
+  conference_end: '2025-05-23'
+  location: Hong Kong, China
+- acronym: ICMLCN
+  year: 2025
+  extracted_at: '2026-05-12T22:57:29'
+  cfp_url: https://ieee-icmlcn.org/
+  submission_deadline: '2025-12-10'
+  notification_date: '2026-02-09'
+  camera_ready: '2026-05-01'
+  conference_start: '2026-06-08'
+  conference_end: '2026-06-11'
+  location: Abu Dhabi, United Arab Emirates
+- acronym: PAKDD
+  year: 2025
+  extracted_at: '2026-05-12T22:57:33'
+  cfp_url: https://pakdd2025.org/
+  conference_start: '2025-06-10'
+  conference_end: '2025-06-13'
+  location: Sydney, Australia
+- acronym: WCNC Workshops
+  year: 2025
+  extracted_at: '2026-05-12T22:57:37'
+  cfp_url: https://www.ieee-wcnc.org/
+  notification_date: '2026-01-11'
+  camera_ready: '2026-02-07'
+  conference_start: '2026-04-13'
+  conference_end: '2026-04-16'
+  location: Kuala Lumpur, Malaysia
+  diverged_fields:
+  - submission_deadline
+- acronym: VTC-Spring
+  year: 2025
+  extracted_at: '2026-05-12T22:57:41'
+  cfp_url: https://events.vtsociety.org/vtc2026-spring/
+  submission_deadline: '2026-01-04'
+  notification_date: '2026-04-10'
+  camera_ready: '2026-04-17'
+  conference_start: '2026-06-09'
+  conference_end: '2026-06-12'
+  location: Nice, France
+- acronym: ICME
+  year: 2025
+  extracted_at: '2026-05-12T22:57:46'
+  cfp_url: https://2025.ieeeicme.org/
+  notification_date: '2025-03-20'
+  location: Nantes, France
+- acronym: USENIX ATC
+  year: 2025
+  extracted_at: '2026-05-12T22:57:52'
+  cfp_url: https://www.usenix.org/conference/atc25
+  conference_start: '2025-07-07'
+  conference_end: '2025-07-09'
+  location: Boston, MA, USA
+- acronym: CTW
+  year: 2025
+  extracted_at: '2026-05-12T22:57:56'
+  cfp_url: http://www.ieee-ctw.org/
+  abstract_deadline: '2026-03-10'
+  notification_date: '2026-03-13'
+  conference_start: '2026-05-17'
+  conference_end: '2026-05-20'
+  location: São Miguel, Azores, Portugal
+- acronym: SIGOPS ATC
+  year: 2025
+  extracted_at: '2026-05-12T22:58:02'
+  cfp_url: https://www.usenix.org/conference/atc25
+  conference_start: '2025-07-07'
+  conference_end: '2025-07-09'
+  location: Boston, MA, USA
+- acronym: ATC
+  year: 2025
+  extracted_at: '2026-05-12T22:58:07'
+  cfp_url: https://www.usenix.org/conference/atc25/
+  conference_start: '2025-07-07'
+  conference_end: '2025-07-09'
+  diverged_fields:
+  - location
+- acronym: FCCM
+  year: 2025
+  extracted_at: '2026-05-12T22:58:11'
+  cfp_url: https://www.fccm.org
+  abstract_deadline: '2026-01-10'
+  submission_deadline: '2026-01-17'
+  notification_date: '2026-03-16'
+  camera_ready: '2026-04-15'
+  conference_start: '2026-05-13'
+  conference_end: '2026-05-16'
+  location: Atlanta, GA, USA
+- acronym: NOSSDAV
+  year: 2025
+  extracted_at: '2026-05-12T22:58:16'
+  cfp_url: https://nossdav.org/2025/
+  submission_deadline: '2025-01-17'
+  notification_date: '2025-02-14'
+  camera_ready: '2025-02-21'
+  page_limit: 6
+- acronym: LICS
+  year: 2025
+  extracted_at: '2026-05-12T22:58:20'
+  cfp_url: https://lics.siglog.org/lics25/
+  abstract_deadline: '2025-01-16'
+  submission_deadline: '2025-01-23'
+  conference_start: '2025-06-23'
+  conference_end: '2025-06-26'
+  diverged_fields:
+  - location
+- acronym: IJCAI
+  year: 2025
+  extracted_at: '2026-05-12T22:58:23'
+  cfp_url: https://2025.ijcai.org/
+  abstract_deadline: '2025-01-16'
+  submission_deadline: '2025-01-23'
+  notification_date: '2025-04-28'
+  conference_start: '2025-08-16'
+  conference_end: '2025-08-22'
+  location: Montreal, Canada
+- acronym: RSS
+  year: 2025
+  extracted_at: '2026-05-12T22:58:28'
+  cfp_url: https://roboticsconference.org
+  abstract_deadline: '2026-01-23'
+  submission_deadline: '2026-01-30'
+  notification_date: '2026-04-27'
+  camera_ready: '2026-05-11'
+  conference_start: '2026-07-13'
+  conference_end: '2026-07-17'
+  location: Sydney, Australia
+- acronym: ICML
+  year: 2025
+  extracted_at: '2026-05-12T22:58:33'
+  cfp_url: https://icml.cc/Conferences/2025
+  conference_start: '2025-07-13'
+  conference_end: '2025-07-19'
+  location: Vancouver, Canada
+- acronym: SIGCOMM
+  year: 2025
+  extracted_at: '2026-05-12T22:58:36'
+  cfp_url: https://conferences.sigcomm.org/sigcomm/2025/
+  abstract_deadline: '2025-01-24'
+  submission_deadline: '2025-01-31'
+  camera_ready: '2025-07-25'
+  conference_start: '2025-09-08'
+  conference_end: '2025-09-11'
+  location: Coimbra, Portugal
+- acronym: USENIX Security
+  year: 2026
+  extracted_at: '2026-05-12T22:58:45'
+  cfp_url: https://www.usenix.org/conference/usenixsecurity26
+  conference_start: '2026-08-12'
+  conference_end: '2026-08-14'
+  diverged_fields:
+  - location
+- acronym: COLT
+  year: 2025
+  extracted_at: '2026-05-12T22:58:48'
+  cfp_url: https://learningtheory.org/colt2025/
+  submission_deadline: '2025-02-06'
+  notification_date: '2025-05-02'
+  conference_start: '2025-06-30'
+  conference_end: '2025-07-04'
+  location: Lyon, France
+- acronym: HPDC
+  year: 2025
+  extracted_at: '2026-05-12T22:58:51'
+  cfp_url: https://hpdc.sci.utah.edu/2025/
+  submission_deadline: '2025-02-06'
+  notification_date: '2025-04-04'
+  conference_end: '2025-07-23'
+  location: Notre Dame, IN, USA
+  diverged_fields:
+  - camera_ready
+  - conference_start
+- acronym: WiOpt
+  year: 2025
+  extracted_at: '2026-05-12T22:58:54'
+  cfp_url: https://wiopt2026.github.io/
+  submission_deadline: '2026-02-02'
+  notification_date: '2026-03-16'
+  camera_ready: '2026-04-03'
+  conference_start: '2026-06-03'
+  conference_end: '2026-06-06'
+  location: Columbus, Ohio, USA
+- acronym: KDD
+  year: 2025
+  extracted_at: '2026-05-12T22:58:59'
+  cfp_url: https://kdd2025.kdd.org/
+  abstract_deadline: '2025-02-03'
+  submission_deadline: '2025-02-10'
+  notification_date: '2025-05-16'
+  conference_start: '2025-08-03'
+  conference_end: '2025-08-07'
+  location: Toronto, ON, Canada
+  rounds:
+  - round: 1
+    abstract_deadline: '2024-08-01'
+    submission_deadline: '2024-08-08'
+    notification_date: '2024-11-16'
+    camera_ready: null
+  - round: 2
+    abstract_deadline: '2025-02-03'
+    submission_deadline: '2025-02-10'
+    notification_date: '2025-05-16'
+    camera_ready: null
+- acronym: UAI
+  year: 2025
+  extracted_at: '2026-05-12T22:59:03'
+  cfp_url: https://www.auai.org/uai2025/
+  conference_start: '2025-07-22'
+  conference_end: '2025-07-24'
+  location: Rio de Janeiro, Brazil
+- acronym: EuCNC
+  year: 2025
+  extracted_at: '2026-05-12T22:59:13'
+  cfp_url: https://www.eucnc.eu/
+  model: sonnet
+- acronym: VNC
+  year: 2025
+  extracted_at: '2026-05-12T22:59:18'
+  cfp_url: http://ieee-vnc.org
+  submission_deadline: '2026-02-13'
+  notification_date: '2026-03-20'
+  conference_start: '2026-06-08'
+  conference_end: '2026-06-10'
+  location: Montreal, Canada
+- acronym: ACL
+  year: 2025
+  extracted_at: '2026-05-12T22:59:21'
+  cfp_url: https://2025.aclweb.org/
+  submission_deadline: '2025-02-15'
+  notification_date: '2025-05-15'
+  camera_ready: '2025-05-30'
+  conference_start: '2025-07-27'
+  conference_end: '2025-08-01'
+  location: Vienna, Austria
+- acronym: EUSIPCO
+  year: 2025
+  extracted_at: '2026-05-12T22:59:28'
+  cfp_url: https://eusipco2026.org/
+  conference_start: '2026-08-31'
+  conference_end: '2026-09-04'
+  location: Bruges, Belgium
+- acronym: APNet
+  year: 2025
+  extracted_at: '2026-05-12T22:59:32'
+  cfp_url: https://conferences.sigcomm.org/events/apnet2025/
+  abstract_deadline: '2025-03-06'
+  submission_deadline: '2025-03-13'
+  notification_date: '2025-04-25'
+  camera_ready: '2025-05-16'
+  conference_start: '2025-08-07'
+  conference_end: '2025-08-08'
+  location: Shanghai, China
+- acronym: USENIX FAST
+  year: 2027
+  extracted_at: '2026-05-12T22:59:37'
+  cfp_url: https://www.usenix.org/conference/fast27
+  submission_deadline: '2026-09-15'
+  conference_start: '2027-02-23'
+  conference_end: '2027-02-25'
+  location: Renton, WA, USA
+- acronym: RecSys
+  year: 2025
+  extracted_at: '2026-05-12T22:59:41'
+  cfp_url: https://recsys.acm.org/recsys25/
+  conference_start: '2025-09-22'
+  conference_end: '2025-09-26'
+  location: Prague, Czech Republic
+- acronym: SOSP
+  year: 2025
+  extracted_at: '2026-05-12T22:59:48'
+  cfp_url: https://sosp.org/
+  conference_start: '2025-10-13'
+  conference_end: '2025-10-16'
+  location: Seoul, South Korea
+  model: sonnet
+- acronym: ACM MM
+  year: 2025
+  extracted_at: '2026-05-12T22:59:53'
+  cfp_url: https://acmmm2025.org/
+  abstract_deadline: '2025-04-04'
+  submission_deadline: '2025-04-11'
+  notification_date: '2025-07-04'
+  conference_start: '2025-10-28'
+  conference_end: '2025-11-01'
+  location: Dublin, Ireland
+- acronym: PIMRC
+  year: 2025
+  extracted_at: '2026-05-12T22:59:58'
+  cfp_url: http://www.ieee-pimrc.org/
+  submission_deadline: '2026-04-16'
+  notification_date: '2026-06-01'
+  camera_ready: '2026-07-01'
+  conference_start: '2026-09-01'
+  conference_end: '2026-09-04'
+  location: Singapore
+- acronym: SPAWC
+  year: 2025
+  extracted_at: '2026-05-12T23:00:01'
+  cfp_url: https://2026.ieeespawc.org/
+  submission_deadline: '2026-04-05'
+  notification_date: '2026-06-14'
+  conference_start: '2026-09-06'
+  conference_end: '2026-09-09'
+  location: Athens, Greece
+- acronym: VTC-Fall
+  year: 2025
+  extracted_at: '2026-05-12T23:00:04'
+  cfp_url: https://events.vtsociety.org/vtc2026-fall/
+  submission_deadline: '2026-03-21'
+  notification_date: '2026-05-12'
+  camera_ready: '2026-05-30'
+  conference_start: '2026-09-06'
+  conference_end: '2026-09-09'
+  location: Boston, MA, USA
+- acronym: CANS
+  year: 2025
+  extracted_at: '2026-05-12T23:00:10'
+  cfp_url: https://cy2sec.comm.eng.osaka-u.ac.jp/miyaji-lab/event/cans2025/index.html
+  location: Osaka, Japan
+- acronym: ITW
+  year: 2025
+  extracted_at: '2026-05-12T23:00:14'
+  cfp_url: https://2026.ieee-itw.org/
+  submission_deadline: '2026-05-10'
+  notification_date: '2026-07-10'
+  camera_ready: '2026-08-17'
+  conference_start: '2026-11-10'
+  conference_end: '2026-11-13'
+  location: Tempe, Arizona, USA
+- acronym: NSDI
+  year: 2026
+  extracted_at: '2026-05-12T23:00:20'
+  cfp_url: https://www.usenix.org/conference/nsdi26
+  conference_start: '2026-05-04'
+  conference_end: '2026-05-06'
+  location: Renton, WA, USA
+- acronym: ITSC
+  year: 2025
+  extracted_at: '2026-05-12T23:00:26'
+  cfp_url: https://www.ieee-itsc.org/2026
+  submission_deadline: '2026-03-01'
+  notification_date: '2026-05-01'
+  camera_ready: '2026-05-15'
+  conference_start: '2026-09-15'
+  conference_end: '2026-09-18'
+  location: Naples, Italy
+- acronym: Asilomar
+  year: 2025
+  extracted_at: '2026-05-12T23:00:30'
+  cfp_url: https://www.asilomarsscconf.org/
+  submission_deadline: '2025-05-08'
+  diverged_fields:
+  - location
+- acronym: HPCC
+  year: 2025
+  extracted_at: '2026-05-12T23:00:34'
+  cfp_url: https://hpcn.exeter.ac.uk/hpcc2025/
+  submission_deadline: '2025-05-18'
+  notification_date: '2025-06-15'
+  camera_ready: '2025-07-15'
+  conference_start: '2025-08-13'
+  conference_end: '2025-08-15'
+  location: Exeter, United Kingdom
+- acronym: GLOBECOM
+  year: 2025
+  extracted_at: '2026-05-12T23:00:39'
+  cfp_url: https://www.ieee-globecom.org/
+  submission_deadline: '2026-05-03'
+  conference_start: '2026-12-07'
+  conference_end: '2026-12-11'
+  location: Macau, China
+- acronym: ECAI
+  year: 2025
+  extracted_at: '2026-05-12T23:00:43'
+  cfp_url: https://ecai2025.org/
+  abstract_deadline: '2025-04-29'
+  submission_deadline: '2025-05-06'
+  notification_date: '2025-07-10'
+  conference_start: '2025-10-27'
+  conference_end: '2025-10-30'
+  location: Bologna, Italy
+- acronym: NeurIPS
+  year: 2025
+  extracted_at: '2026-05-12T23:00:49'
+  cfp_url: https://neurips.cc/Conferences/2025
+  conference_start: '2025-12-02'
+  conference_end: '2025-12-07'
+  location: San Diego, CA, USA
+- acronym: EuroSys
+  year: 2026
+  extracted_at: '2026-05-12T23:00:53'
+  cfp_url: https://2026.eurosys.org/
+  conference_start: '2026-04-27'
+  conference_end: '2026-04-30'
+  location: Edinburgh, UK
+  rounds:
+  - round: 1
+    abstract_deadline: '2025-05-08'
+    submission_deadline: '2025-05-15'
+    notification_date: '2025-08-22'
+    camera_ready: '2025-09-26'
+  - round: 2
+    abstract_deadline: '2025-09-18'
+    submission_deadline: '2025-09-25'
+    notification_date: '2026-01-30'
+    camera_ready: '2026-03-06'
+- acronym: Asiacrypt
+  year: 2025
+  extracted_at: '2026-05-12T23:00:57'
+  cfp_url: https://asiacrypt.iacr.org/2025
+  submission_deadline: '2025-05-16'
+  notification_date: '2025-08-10'
+  camera_ready: '2025-09-10'
+  conference_start: '2025-12-08'
+  conference_end: '2025-12-12'
+  location: Melbourne, Australia
+  rounds:
+  - round: 1
+    abstract_deadline: null
+    submission_deadline: '2025-05-16'
+    notification_date: '2025-07-13'
+    camera_ready: null
+- acronym: ICNP
+  year: 2025
+  extracted_at: '2026-05-12T23:01:00'
+  cfp_url: https://ieeeicnp2025.pages.dev/
+  abstract_deadline: '2025-05-09'
+  submission_deadline: '2025-05-16'
+  notification_date: '2025-07-25'
+  camera_ready: '2025-08-18'
+  conference_start: '2025-09-22'
+  conference_end: '2025-09-25'
+  location: Seoul, South Korea
+- acronym: CIKM
+  year: 2025
+  extracted_at: '2026-05-12T23:01:07'
+  cfp_url: https://cikm2025.org/
+  location: Korea
+  model: sonnet
+- acronym: CNS
+  year: 2025
+  extracted_at: '2026-05-12T23:01:12'
+  cfp_url: http://www.ieee-cns.org/
+  submission_deadline: '2026-05-18'
+  notification_date: '2026-07-18'
+  camera_ready: '2026-08-14'
+  conference_start: '2026-09-14'
+  conference_end: '2026-09-17'
+  location: Newark, Delaware, USA
+- acronym: WSA
+  year: 2025
+  extracted_at: '2026-05-12T23:01:17'
+  cfp_url: https://wsa2026.cttc.es/index.php
+  submission_deadline: '2026-05-14'
+  notification_date: '2026-07-15'
+  camera_ready: '2026-08-15'
+- acronym: IEEE ICDE
+  year: 2026
+  extracted_at: '2026-05-12T23:01:22'
+  cfp_url: https://icde2026.github.io/
+  abstract_deadline: '2025-11-05'
+  submission_deadline: '2025-11-09'
+  conference_start: '2026-05-04'
+  conference_end: '2026-05-08'
+  location: Montreal, Canada
+  rounds:
+  - round: 1
+    abstract_deadline: null
+    submission_deadline: null
+    notification_date: '2025-12-17'
+    camera_ready: null
+  - round: 2
+    abstract_deadline: null
+    submission_deadline: null
+    notification_date: null
+    camera_ready: null
+  diverged_fields:
+  - camera_ready
+- acronym: PIMRC Workshops
+  year: 2025
+  extracted_at: '2026-05-12T23:01:28'
+  cfp_url: https://www.ieee-pimrc.org/
+  submission_deadline: '2026-04-16'
+  notification_date: '2026-06-01'
+  camera_ready: '2026-07-01'
+  conference_start: '2026-09-01'
+  conference_end: '2026-09-04'
+  location: Singapore
+- acronym: WIFS
+  year: 2025
+  extracted_at: '2026-05-12T23:01:32'
+  cfp_url: https://wifs2026.utt.fr/
+  conference_start: '2026-12-07'
+  conference_end: '2026-12-11'
+  location: Sendai, Japan
+- acronym: CCNC
+  year: 2026
+  extracted_at: '2026-05-12T23:01:36'
+  cfp_url: https://ieee-ccnc.org/
+  submission_deadline: '2026-07-01'
+  notification_date: '2026-07-31'
+  camera_ready: '2026-08-31'
+  conference_start: '2027-01-09'
+  conference_end: '2027-01-12'
+  page_limit: 6
+  location: Las Vegas, NV, USA
+- acronym: SenSys
+  year: 2026
+  extracted_at: '2026-05-12T23:01:41'
+  cfp_url: https://sensys.acm.org/2026/
+  abstract_deadline: '2025-11-06'
+  submission_deadline: '2025-11-13'
+  notification_date: '2026-01-29'
+  camera_ready: '2026-03-31'
+  conference_start: '2026-05-11'
+  conference_end: '2026-05-14'
+  location: Saint-Malo, France
+  rounds:
+  - round: 1
+    abstract_deadline: '2025-07-01'
+    submission_deadline: '2025-07-01'
+    notification_date: '2025-09-21'
+    camera_ready: null
+  - round: 2
+    abstract_deadline: '2025-11-06'
+    submission_deadline: '2025-11-13'
+    notification_date: '2026-01-29'
+    camera_ready: '2026-03-31'
+- acronym: Allerton
+  year: 2025
+  extracted_at: '2026-05-12T23:01:46'
+  cfp_url: https://allerton.csl.illinois.edu/
+  conference_start: '2026-09-15'
+  conference_end: '2026-09-18'
+  location: Urbana-Champaign, United States
+- acronym: CAMSAP
+  year: 2025
+  extracted_at: '2026-05-12T23:01:50'
+  cfp_url: https://camsap25.ig.umons.ac.be
+  conference_start: '2025-12-14'
+  conference_end: '2025-12-17'
+  location: Dominican Republic
+- acronym: ACM/IEEE ICSE
+  year: 2026
+  extracted_at: '2026-05-12T23:01:54'
+  cfp_url: https://conf.researchr.org/home/icse-2026
+  conference_start: '2026-04-12'
+  conference_end: '2026-04-18'
+  location: Rio de Janeiro, Brazil
+- acronym: ICSOC
+  year: 2025
+  extracted_at: '2026-05-12T23:01:59'
+  cfp_url: https://icsoc2025.hit.edu.cn/
+  conference_start: '2025-12-01'
+  conference_end: '2025-12-04'
+  location: Harbin, China
+- acronym: MMAsia
+  year: 2025
+  extracted_at: '2026-05-12T23:02:05'
+  cfp_url: https://mmasia2025.org/
+  submission_deadline: '2025-08-13'
+  notification_date: '2025-10-03'
+  camera_ready: '2025-10-13'
+  conference_start: '2025-12-09'
+  conference_end: '2025-12-12'
+  location: Kuala Lumpur, Malaysia
+- acronym: SIGMETRICS
+  year: 2026
+  extracted_at: '2026-05-12T23:02:09'
+  cfp_url: https://www.sigmetrics.org/sigmetrics2026
+  conference_start: '2026-06-08'
+  conference_end: '2026-06-12'
+  location: Ann Arbor, Michigan, USA
+- acronym: HPCA
+  year: 2026
+  extracted_at: '2026-05-12T23:02:13'
+  cfp_url: https://hpca-conf.org/2026/
+  conference_start: '2026-01-31'
+  conference_end: '2026-02-04'
+  location: Sydney, Australia
+- acronym: INFOCOM
+  year: 2026
+  extracted_at: '2026-05-12T23:02:16'
+  cfp_url: https://infocom2026.ieee-infocom.org/
+  abstract_deadline: '2025-07-24'
+  submission_deadline: '2025-07-31'
+  notification_date: '2025-12-08'
+  conference_start: '2026-05-18'
+  conference_end: '2026-05-21'
+  location: Tokyo, Japan
+- acronym: KDD
+  year: 2026
+  extracted_at: '2026-05-12T23:02:20'
+  cfp_url: https://kdd2026.kdd.org/
+  conference_start: '2026-08-09'
+  conference_end: '2026-08-13'
+  location: Jeju, Korea
+- acronym: AAAI
+  year: 2026
+  extracted_at: '2026-05-12T23:02:23'
+  cfp_url: https://aaai.org/conference/aaai/aaai-26/
+  abstract_deadline: '2025-07-25'
+  submission_deadline: '2025-08-01'
+  notification_date: '2025-11-08'
+  camera_ready: '2025-11-16'
+  conference_start: '2026-01-20'
+  conference_end: '2026-01-27'
+  location: Singapore
+- acronym: GC Wkshps
+  year: 2025
+  extracted_at: '2026-05-12T23:02:27'
+  cfp_url: https://www.ieee-globecom.org/
+  submission_deadline: '2026-05-03'
+  conference_start: '2026-12-07'
+  conference_end: '2026-12-11'
+  diverged_fields:
+  - location
+- acronym: ASPLOS
+  year: 2026
+  extracted_at: '2026-05-12T23:02:32'
+  cfp_url: https://www.asplos-conference.org/asplos2024/
+  conference_start: '2024-04-27'
+  conference_end: '2024-05-01'
+  location: San Diego, USA
+- acronym: OPODIS
+  year: 2025
+  extracted_at: '2026-05-12T23:02:35'
+  cfp_url: https://conferences.info.uaic.ro/opodis2025/index.html
+  conference_start: '2025-12-03'
+  conference_end: '2025-12-05'
+  location: Iaşi, Romania
+- acronym: PPoPP
+  year: 2026
+  extracted_at: '2026-05-12T23:02:39'
+  cfp_url: https://ppopp26.sigplan.org/
+  conference_start: '2026-01-31'
+  conference_end: '2026-02-04'
+  location: Sydney, Australia
+- acronym: MobiCom
+  year: 2026
+  extracted_at: '2026-05-12T23:02:45'
+  cfp_url: https://sigmobile.org/mobicom/2026/
+  rounds:
+  - round: 1
+    abstract_deadline: '2025-08-27'
+    submission_deadline: '2025-09-03'
+    notification_date: '2025-11-24'
+    camera_ready: null
+  - round: 2
+    abstract_deadline: '2026-03-06'
+    submission_deadline: '2026-03-13'
+    notification_date: '2026-06-22'
+    camera_ready: null
+  model: sonnet
+- acronym: FSE
+  year: 2026
+  extracted_at: '2026-05-12T23:02:49'
+  cfp_url: https://conf.researchr.org/home/fse-2026
+  conference_start: '2026-07-05'
+  conference_end: '2026-07-09'
+- acronym: ICRA
+  year: 2026
+  extracted_at: '2026-05-12T23:02:52'
+  cfp_url: https://2026.ieee-icra.org/
+  conference_start: '2026-06-01'
+  conference_end: '2026-06-05'
+  location: Vienna, Austria
+- acronym: ICASSP
+  year: 2026
+  extracted_at: '2026-05-12T23:02:55'
+  cfp_url: https://2026.ieeeicassp.org/
+  conference_start: '2026-05-04'
+  conference_end: '2026-05-08'
+  location: Barcelona, Spain
+- acronym: FC
+  year: 2026
+  extracted_at: '2026-05-12T23:05:18'
+  cfp_url: https://fc26.ifca.ai
+  conference_start: '2026-03-02'
+  conference_end: '2026-03-06'
+  location: St. Kitts, Saint Kitts and Nevis
+- acronym: SOFSEM
+  year: 2026
+  extracted_at: '2026-05-12T23:05:20'
+  cfp_url: https://sofsem.uj.edu.pl
+  abstract_deadline: '2025-09-15'
+  submission_deadline: '2025-09-18'
+  notification_date: '2025-11-10'
+  camera_ready: '2025-12-01'
+  conference_start: '2026-02-09'
+  conference_end: '2026-02-13'
+  location: Kraków, Poland
+- acronym: USENIX NSDI
+  year: 2026
+  extracted_at: '2026-05-12T23:05:27'
+  cfp_url: https://www.usenix.org/conference/nsdi26/
+  conference_start: '2026-05-04'
+  conference_end: '2026-05-06'
+  location: Renton, WA, USA
+- acronym: STACS
+  year: 2026
+  extracted_at: '2026-05-12T23:05:30'
+  cfp_url: http://www.stacs-conf.org/
+  conference_start: '2026-03-09'
+  conference_end: '2026-03-13'
+  location: Grenoble, France
+- acronym: ICLR
+  year: 2026
+  extracted_at: '2026-05-12T23:05:35'
+  cfp_url: https://iclr.cc/Conferences/2026
+  notification_date: '2026-02-28'
+  conference_start: '2026-04-23'
+  conference_end: '2026-04-27'
+  location: Rio de Janeiro, Brazil
+- acronym: SAC
+  year: 2026
+  extracted_at: '2026-05-12T23:05:40'
+  cfp_url: https://www.sigapp.org/sac/sac2026/
+  submission_deadline: '2025-10-17'
+  notification_date: '2025-11-21'
+  camera_ready: '2025-12-12'
+  conference_start: '2026-03-23'
+  conference_end: '2026-03-27'
+  location: Thessaloniki, Greece
+- acronym: ACNS
+  year: 2026
+  extracted_at: '2026-05-12T23:05:43'
+  cfp_url: https://acns2026.github.io/
+  conference_start: '2026-06-22'
+  conference_end: '2026-06-25'
+  rounds:
+  - round: 1
+    abstract_deadline: null
+    submission_deadline: '2025-09-26'
+    notification_date: '2025-11-20'
+    camera_ready: null
+  - round: 2
+    abstract_deadline: null
+    submission_deadline: '2026-01-23'
+    notification_date: '2026-03-19'
+    camera_ready: null
+  diverged_fields:
+  - submission_deadline
+  - notification_date
+  - location
+- acronym: Eurocrypt
+  year: 2026
+  extracted_at: '2026-05-12T23:05:51'
+  cfp_url: https://eurocrypt.iacr.org/2026/
+  submission_deadline: '2025-10-02'
+  notification_date: '2026-01-29'
+  conference_start: '2026-05-10'
+  conference_end: '2026-05-14'
+  location: Rome, Italy
+- acronym: AISTATS
+  year: 2026
+  extracted_at: '2026-05-12T23:05:55'
+  cfp_url: https://virtual.aistats.org/Conferences/2026
+  notification_date: '2026-01-22'
+  camera_ready: '2026-03-31'
+  conference_start: '2026-05-02'
+  conference_end: '2026-05-05'
+  location: Tangier, Morocco
+- acronym: WWW
+  year: 2026
+  extracted_at: '2026-05-12T23:06:01'
+  cfp_url: https://www2026.thewebconf.org/
+  model: sonnet
+- acronym: IPDPS
+  year: 2026
+  extracted_at: '2026-05-12T23:06:06'
+  cfp_url: https://www.ipdps.org/
+  conference_start: '2026-05-25'
+  conference_end: '2026-05-29'
+  location: New Orleans, USA
+- acronym: PAM
+  year: 2026
+  extracted_at: '2026-05-12T23:06:08'
+  cfp_url: https://pam2026.at
+  abstract_deadline: '2025-10-15'
+  submission_deadline: '2025-10-15'
+  notification_date: '2025-11-17'
+  camera_ready: '2025-12-10'
+  conference_start: '2026-03-23'
+  conference_end: '2026-03-25'
+- acronym: SIGMOD/PODS
+  year: 2026
+  extracted_at: '2026-05-12T23:06:13'
+  cfp_url: https://2026.sigmod.org
+  conference_start: '2026-05-31'
+  conference_end: '2026-06-05'
+  location: Bengaluru, India
+- acronym: WCNC
+  year: 2026
+  extracted_at: '2026-05-12T23:06:18'
+  cfp_url: https://wcnc2026.ieee-wcnc.org/
+  notification_date: '2026-01-11'
+  camera_ready: '2026-02-07'
+  conference_start: '2026-04-13'
+  conference_end: '2026-04-16'
+  location: Kuala Lumpur, Malaysia
+- acronym: MLSys
+  year: 2026
+  extracted_at: '2026-05-12T23:06:22'
+  cfp_url: https://mlsys.org/
+  submission_deadline: '2025-10-30'
+  notification_date: '2026-01-26'
+  conference_start: '2026-05-18'
+  conference_end: '2026-05-22'
+  location: Bellevue, WA
+- acronym: NOMS
+  year: 2026
+  extracted_at: '2026-05-12T23:06:27'
+  cfp_url: https://noms2026.ieee-noms.org/
+  camera_ready: '2026-02-14'
+  conference_start: '2026-05-18'
+  conference_end: '2026-05-22'
+  location: Rome, Italy
+  diverged_fields:
+  - notification_date
+- acronym: ICPE
+  year: 2026
+  extracted_at: '2026-05-12T23:06:34'
+  cfp_url: https://icpe2026.spec.org/
+  model: sonnet
+- acronym: LCN
+  year: 2025
+  extracted_at: '2026-05-12T23:06:42'
+  cfp_url: https://www.ieeelcn.org
+  location: Coimbra, Portugal
+  model: sonnet
+- acronym: SP
+  year: 2026
+  extracted_at: '2026-05-12T23:06:45'
+  cfp_url: https://sp2026.ieee-security.org/
+  conference_start: '2026-05-18'
+  conference_end: '2026-05-21'
+  diverged_fields:
+  - location
+- acronym: IMC
+  year: 2026
+  extracted_at: '2026-05-12T23:06:50'
+  cfp_url: https://conferences.sigcomm.org/imc/2026/
+  submission_deadline: '2025-11-20'
+  notification_date: '2026-03-17'
+  camera_ready: '2026-04-14'
+  conference_start: '2026-10-12'
+  conference_end: '2026-10-16'
+  location: Karlsruhe, Germany
+  rounds:
+  - round: 1
+    abstract_deadline: '2025-11-13'
+    submission_deadline: '2025-11-20'
+    notification_date: '2026-03-17'
+    camera_ready: '2026-04-14'
+  - round: 2
+    abstract_deadline: '2026-04-22'
+    submission_deadline: '2026-04-29'
+    notification_date: '2026-08-04'
+    camera_ready: '2026-09-01'
+- acronym: EuroS&amp;P
+  year: 2026
+  extracted_at: '2026-05-12T23:06:53'
+  cfp_url: https://eurosp2026.ieee-security.org/
+  submission_deadline: '2025-11-20'
+  notification_date: '2026-03-05'
+  camera_ready: '2026-04-23'
+  conference_start: '2026-07-06'
+  conference_end: '2026-07-10'
+  location: Lisbon, Portugal
+- acronym: MMSys
+  year: 2026
+  extracted_at: '2026-05-12T23:06:57'
+  cfp_url: https://2026.acmmmsys.org
+  conference_start: '2026-04-04'
+  conference_end: '2026-04-08'
+  location: Hong Kong SAR, China
+  rounds:
+  - round: 1
+    abstract_deadline: null
+    submission_deadline: null
+    notification_date: '2025-10-24'
+    camera_ready: null
+  - round: 2
+    abstract_deadline: null
+    submission_deadline: '2025-11-21'
+    notification_date: null
+    camera_ready: null
+  diverged_fields:
+  - notification_date
+- acronym: DSN
+  year: 2026
+  extracted_at: '2026-05-12T23:07:04'
+  cfp_url: https://dsn2026.github.io/
+  conference_start: '2026-06-01'
+  location: Charlotte, North Carolina, US
+  model: sonnet
+- acronym: WoWMoM
+  year: 2026
+  extracted_at: '2026-05-12T23:07:08'
+  cfp_url: https://www.cs.unibo.it/wowmom2026/
+  submission_deadline: '2025-12-15'
+  notification_date: '2026-03-09'
+  camera_ready: '2026-05-05'
+  conference_start: '2026-06-16'
+  conference_end: '2026-06-19'
+  location: Bologna, Italy
+  diverged_fields:
+  - abstract_deadline
+- acronym: IEEE/IFIP DSN
+  year: 2026
+  extracted_at: '2026-05-12T23:07:14'
+  cfp_url: https://dsn2026.github.io/
+  conference_start: '2026-06-01'
+  location: Charlotte, North Carolina, US
+  model: sonnet
+- acronym: MobiSys
+  year: 2026
+  extracted_at: '2026-05-12T23:07:17'
+  cfp_url: https://www.sigmobile.org/mobisys/2026/
+  abstract_deadline: '2025-11-28'
+  submission_deadline: '2025-12-05'
+  notification_date: '2026-03-02'
+  camera_ready: '2026-04-13'
+  conference_start: '2026-06-22'
+  location: Cambridge, UK
+  diverged_fields:
+  - conference_end
+- acronym: OSDI
+  year: 2026
+  extracted_at: '2026-05-12T23:07:23'
+  cfp_url: https://www.usenix.org/conference/osdi26
+  conference_start: '2026-07-13'
+  conference_end: '2026-07-15'
+  location: Seattle, WA, USA
+- acronym: Middleware
+  year: 2026
+  extracted_at: '2026-05-12T23:07:26'
+  cfp_url: https://middleware-conf.github.io/2026/
+  conference_start: '2026-12-14'
+  conference_end: '2026-12-18'
+  location: Tarragona, Spain
+- acronym: IEEE ICDCS
+  year: 2026
+  extracted_at: '2026-05-12T23:07:30'
+  cfp_url: https://icdcs2026.icdcs.org/
+  abstract_deadline: '2026-01-21'
+  submission_deadline: '2026-01-21'
+  notification_date: '2026-04-27'
+  camera_ready: '2026-05-14'
+  conference_start: '2026-06-22'
+  conference_end: '2026-06-25'
+  location: Seoul, South Korea
+- acronym: CCGrid
+  year: 2026
+  extracted_at: '2026-05-12T23:07:35'
+  cfp_url: https://ccgrid2026.cdms.westernsydney.edu.au/
+  abstract_deadline: '2025-12-21'
+  submission_deadline: '2025-12-21'
+  notification_date: '2026-02-10'
+  camera_ready: '2026-03-22'
+  conference_start: '2026-05-18'
+  conference_end: '2026-05-21'
+  location: Sydney, Australia
+- acronym: ICS
+  year: 2026
+  extracted_at: '2026-05-12T23:07:39'
+  cfp_url: https://dipsa-qub.github.io/ICS2026-webpage/
+  abstract_deadline: '2026-04-15'
+  location: Belfast, Northern Ireland
+  diverged_fields:
+  - camera_ready
+- acronym: SECON
+  year: 2026
+  extracted_at: '2026-05-12T23:07:44'
+  cfp_url: https://ieee-secon.org/
+  abstract_deadline: '2025-12-30'
+  submission_deadline: '2025-12-30'
+  notification_date: '2026-03-06'
+  camera_ready: '2026-04-16'
+  conference_start: '2026-06-03'
+  conference_end: '2026-06-05'
+  location: Pisa, Italy
+- acronym: ICME
+  year: 2026
+  extracted_at: '2026-05-12T23:07:49'
+  cfp_url: https://2026.ieeeicme.org/
+  submission_deadline: '2025-12-31'
+  location: Bangkok, Thailand
+- acronym: VTC-Spring
+  year: 2026
+  extracted_at: '2026-05-12T23:07:53'
+  cfp_url: https://events.vtsociety.org/vtc2026-spring/
+  submission_deadline: '2026-01-04'
+  notification_date: '2026-04-10'
+  camera_ready: '2026-04-17'
+  conference_start: '2026-06-09'
+  conference_end: '2026-06-12'
+  location: Nice, France
+- acronym: ICBC
+  year: 2026
+  extracted_at: '2026-05-12T23:07:56'
+  cfp_url: https://icbc2026.ieee-icbc.org/
+  submission_deadline: '2026-01-14'
+  notification_date: '2026-03-18'
+  camera_ready: '2026-04-21'
+  conference_start: '2026-06-01'
+  conference_end: '2026-06-05'
+  location: Brisbane, Australia
+- acronym: WiOpt
+  year: 2026
+  extracted_at: '2026-05-12T23:07:59'
+  cfp_url: https://wiopt2026.github.io/
+  submission_deadline: '2026-02-02'
+  notification_date: '2026-03-16'
+  camera_ready: '2026-04-03'
+  conference_start: '2026-06-03'
+  conference_end: '2026-06-06'
+  location: Columbus, Ohio, USA
+- acronym: WCNC Workshops
+  year: 2026
+  extracted_at: '2026-05-12T23:08:03'
+  cfp_url: https://www.ieee-wcnc.org/
+  notification_date: '2026-01-11'
+  camera_ready: '2026-02-07'
+  conference_start: '2026-04-13'
+  conference_end: '2026-04-16'
+  location: Kuala Lumpur, Malaysia
+  diverged_fields:
+  - submission_deadline
+- acronym: ICDCS
+  year: 2026
+  extracted_at: '2026-05-12T23:08:06'
+  cfp_url: https://icdcs2026.icdcs.org/
+  abstract_deadline: '2026-01-21'
+  submission_deadline: '2026-01-21'
+  notification_date: '2026-04-27'
+  camera_ready: '2026-05-14'
+  conference_start: '2026-06-22'
+  conference_end: '2026-06-25'
+  location: Seoul, South Korea
+- acronym: VNC
+  year: 2026
+  extracted_at: '2026-05-12T23:08:10'
+  cfp_url: https://vnc2026.ieee-vnc.org/
+  submission_deadline: '2026-02-13'
+  notification_date: '2026-03-20'
+  conference_start: '2026-06-08'
+  conference_end: '2026-06-10'
+  location: Montreal, Canada
+- acronym: NOSSDAV
+  year: 2026
+  extracted_at: '2026-05-12T23:08:13'
+  cfp_url: https://nossdav.org/2026/
+  submission_deadline: '2026-01-16'
+  notification_date: '2026-02-13'
+  camera_ready: '2026-02-20'
+  page_limit: 6
+- acronym: IJCAI
+  year: 2026
+  extracted_at: '2026-05-12T23:08:18'
+  cfp_url: https://2026.ijcai.org/
+  submission_deadline: '2026-01-19'
+  conference_start: '2026-08-15'
+  conference_end: '2026-08-21'
+  location: Bremen, Germany
+- acronym: DCOSS-IoT
+  year: 2026
+  extracted_at: '2026-05-12T23:08:21'
+  cfp_url: https://dcoss.org
+  abstract_deadline: '2026-02-08'
+  submission_deadline: '2026-02-08'
+  notification_date: '2026-03-28'
+  camera_ready: '2026-04-30'
+  conference_start: '2026-06-22'
+  conference_end: '2026-06-24'
+  location: Reykjavik, Iceland
+- acronym: ICML
+  year: 2026
+  extracted_at: '2026-05-12T23:08:25'
+  cfp_url: https://icml.cc/Conferences/2026
+  conference_start: '2026-07-06'
+  conference_end: '2026-07-11'
+  location: Seoul, South Korea
+- acronym: HPDC
+  year: 2026
+  extracted_at: '2026-05-12T23:08:28'
+  cfp_url: https://hpdc.sci.utah.edu/2026/
+  abstract_deadline: '2026-02-05'
+  submission_deadline: '2026-03-02'
+  notification_date: '2026-04-30'
+  camera_ready: '2026-05-08'
+  conference_start: '2026-07-13'
+  conference_end: '2026-07-16'
+  location: Cleveland, OH, USA
+- acronym: RSS
+  year: 2026
+  extracted_at: '2026-05-12T23:08:32'
+  cfp_url: https://roboticsconference.org
+  abstract_deadline: '2026-01-23'
+  submission_deadline: '2026-01-30'
+  notification_date: '2026-04-27'
+  camera_ready: '2026-05-11'
+  conference_start: '2026-07-13'
+  conference_end: '2026-07-17'
+  location: Sydney, Australia
+- acronym: COLT
+  year: 2026
+  extracted_at: '2026-05-12T23:08:35'
+  cfp_url: https://learningtheory.org/colt2026/
+  submission_deadline: '2026-02-04'
+  notification_date: '2026-05-04'
+  conference_start: '2026-06-29'
+  conference_end: '2026-07-03'
+  location: San Diego, California
+- acronym: ICALP
+  year: 2026
+  extracted_at: '2026-05-12T23:08:38'
+  cfp_url: https://icalppodcspaa2026.cs.rhul.ac.uk/
+  abstract_deadline: '2026-02-03'
+  submission_deadline: '2026-02-06'
+  notification_date: '2026-04-20'
+  camera_ready: '2026-05-11'
+  conference_start: '2026-07-07'
+  conference_end: '2026-07-10'
+  diverged_fields:
+  - location
+- acronym: SIGCOMM
+  year: 2026
+  extracted_at: '2026-05-12T23:08:42'
+  cfp_url: https://conferences.sigcomm.org/sigcomm/2026/
+  conference_start: '2026-08-17'
+  conference_end: '2026-08-21'
+  location: Denver, Colorado, USA
+- acronym: EC
+  year: 2026
+  extracted_at: '2026-05-12T23:08:48'
+  cfp_url: https://ec26.sigecom.org/
+  abstract_deadline: '2026-02-02'
+  submission_deadline: '2026-02-09'
+  notification_date: '2026-05-18'
+  conference_start: '2026-07-06'
+  conference_end: '2026-07-10'
+  location: Rome, Italy
+  rounds:
+  - round: 1
+    abstract_deadline: '2026-02-02'
+    submission_deadline: '2026-02-09'
+    notification_date: '2026-03-26'
+    camera_ready: null
+  - round: 2
+    abstract_deadline: null
+    submission_deadline: null
+    notification_date: '2026-05-18'
+    camera_ready: null
+- acronym: IWQoS
+  year: 2026
+  extracted_at: '2026-05-12T23:08:51'
+  cfp_url: https://iwqos2026.ieee-iwqos.org/
+  abstract_deadline: '2026-02-16'
+  submission_deadline: '2026-02-23'
+  notification_date: '2026-04-30'
+  camera_ready: '2026-05-20'
+  conference_start: '2026-06-29'
+  conference_end: '2026-07-02'
+  location: Istanbul, Türkiye
+- acronym: EUSIPCO
+  year: 2026
+  extracted_at: '2026-05-12T23:08:56'
+  cfp_url: https://eusipco2026.org/
+  conference_start: '2026-08-31'
+  conference_end: '2026-09-04'
+  location: Bruges, Belgium
+- acronym: EuCNC
+  year: 2026
+  extracted_at: '2026-05-12T23:09:02'
+  cfp_url: https://www.eucnc.eu/
+  model: sonnet
+- acronym: Crypto
+  year: 2026
+  extracted_at: '2026-05-12T23:09:05'
+  cfp_url: https://crypto.iacr.org/2026/
+  submission_deadline: '2026-02-12'
+  notification_date: '2026-05-04'
+  camera_ready: '2026-06-08'
+  conference_start: '2026-08-17'
+  conference_end: '2026-08-20'
+  rounds:
+  - round: 1
+    abstract_deadline: null
+    submission_deadline: '2026-02-12'
+    notification_date: '2026-04-07'
+    camera_ready: null
+  diverged_fields:
+  - location
+- acronym: PODC
+  year: 2026
+  extracted_at: '2026-05-12T23:09:09'
+  cfp_url: https://www.podc.org/
+  abstract_deadline: '2026-02-11'
+  submission_deadline: '2026-02-16'
+  notification_date: '2026-04-29'
+  camera_ready: '2026-05-20'
+  conference_start: '2026-07-06'
+  conference_end: '2026-07-10'
+  location: Egham, England
+- acronym: ACM PODC
+  year: 2026
+  extracted_at: '2026-05-12T23:09:12'
+  cfp_url: https://www.podc.org/
+  abstract_deadline: '2026-02-11'
+  submission_deadline: '2026-02-16'
+  notification_date: '2026-04-29'
+  camera_ready: '2026-05-20'
+  conference_start: '2026-07-06'
+  conference_end: '2026-07-10'
+  location: Egham, England
+- acronym: ACM DEBS
+  year: 2026
+  extracted_at: '2026-05-12T23:09:16'
+  cfp_url: https://2026.debs.org/
+  abstract_deadline: '2026-02-22'
+  submission_deadline: '2026-03-01'
+  notification_date: '2026-04-18'
+  camera_ready: '2026-05-15'
+  conference_start: '2026-06-23'
+  conference_end: '2026-06-26'
+  location: Lisbon, Portugal
+- acronym: COMPSAC
+  year: 2026
+  extracted_at: '2026-05-12T23:09:19'
+  cfp_url: https://ieeecompsac.computer.org/2026/
+  submission_deadline: '2026-02-20'
+  notification_date: '2026-04-12'
+  camera_ready: '2026-05-30'
+  conference_start: '2026-07-07'
+  conference_end: '2026-07-10'
+  location: Madrid, Spain
+- acronym: UAI
+  year: 2026
+  extracted_at: '2026-05-12T23:09:23'
+  cfp_url: https://www.auai.org/uai2026/
+  conference_start: '2026-08-18'
+  conference_end: '2026-08-20'
+  location: Amsterdam, Netherlands
+- acronym: PETS
+  year: 2025
+  extracted_at: '2026-05-12T23:09:28'
+  cfp_url: https://petsymposium.org/index.php
+  conference_start: '2026-07-20'
+  conference_end: '2026-07-25'
+  location: Calgary, Canada
+  rounds:
+  - round: 1
+    abstract_deadline: null
+    submission_deadline: '2025-05-31'
+    notification_date: '2025-08-01'
+    camera_ready: '2025-09-15'
+  - round: 2
+    abstract_deadline: null
+    submission_deadline: '2025-08-31'
+    notification_date: '2025-11-01'
+    camera_ready: '2025-12-15'
+  - round: 3
+    abstract_deadline: null
+    submission_deadline: '2025-11-30'
+    notification_date: '2026-02-01'
+    camera_ready: '2026-03-15'
+  - round: 4
+    abstract_deadline: null
+    submission_deadline: '2026-02-28'
+    notification_date: '2026-05-01'
+    camera_ready: '2026-06-15'
+- acronym: ENTROPY
+  year: 2026
+  extracted_at: '2026-05-12T23:09:33'
+  cfp_url: https://sciforum.net/event/entropy2026
+  abstract_deadline: '2026-04-01'
+  notification_date: '2026-04-17'
+  conference_start: '2026-07-01'
+  conference_end: '2026-07-03'
+  location: Barcelona, Spain
+- acronym: ITSC
+  year: 2026
+  extracted_at: '2026-05-12T23:09:39'
+  cfp_url: https://www.ieee-itsc.org/2026
+  submission_deadline: '2026-03-01'
+  notification_date: '2026-05-01'
+  camera_ready: '2026-05-15'
+  conference_start: '2026-09-15'
+  conference_end: '2026-09-18'
+  location: Naples, Italy
+- acronym: IROS
+  year: 2026
+  extracted_at: '2026-05-12T23:09:42'
+  cfp_url: https://2026.ieee-iros.org/
+  submission_deadline: '2026-03-02'
+  notification_date: '2026-06-16'
+  camera_ready: '2026-07-10'
+  conference_start: '2026-09-27'
+  conference_end: '2026-10-01'
+  location: Pittsburgh, PA, USA
+- acronym: Euro-Par
+  year: 2026
+  extracted_at: '2026-05-12T23:09:46'
+  cfp_url: https://2026.euro-par.org/
+  conference_start: '2026-08-24'
+  conference_end: '2026-08-28'
+  location: Pisa, Italy
+- acronym: CTW
+  year: 2026
+  extracted_at: '2026-05-12T23:09:52'
+  cfp_url: http://www.ieee-ctw.org/
+  abstract_deadline: '2026-03-10'
+  notification_date: '2026-03-13'
+  conference_start: '2026-05-17'
+  conference_end: '2026-05-20'
+  location: São Miguel, Azores, Portugal
+- acronym: APNet
+  year: 2026
+  extracted_at: '2026-05-12T23:09:55'
+  cfp_url: https://conferences.sigcomm.org/events/apnet2026/
+  submission_deadline: '2026-03-06'
+  notification_date: '2026-03-11'
+  camera_ready: '2026-05-29'
+  conference_start: '2026-08-06'
+  conference_end: '2026-08-07'
+  location: Singapore
+- acronym: ACM MobiCom
+  year: 2026
+  extracted_at: '2026-05-12T23:10:02'
+  cfp_url: https://www.sigmobile.org/mobicom/2026/
+  rounds:
+  - round: 1
+    abstract_deadline: '2025-08-27'
+    submission_deadline: '2025-09-03'
+    notification_date: '2025-11-24'
+    camera_ready: null
+  - round: 2
+    abstract_deadline: '2026-03-06'
+    submission_deadline: '2026-03-13'
+    notification_date: '2026-06-22'
+    camera_ready: null
+  model: sonnet
+- acronym: DAPPS
+  year: 2026
+  extracted_at: '2026-05-12T23:10:06'
+  cfp_url: https://cisose.fit.ac.jp/dapps/
+  conference_start: '2026-07-27'
+  conference_end: '2026-07-30'
+  location: Fukuoka, Japan
+- acronym: VTC-Fall
+  year: 2026
+  extracted_at: '2026-05-12T23:10:09'
+  cfp_url: https://events.vtsociety.org/vtc2026-fall/
+  submission_deadline: '2026-03-21'
+  notification_date: '2026-05-12'
+  camera_ready: '2026-05-30'
+  conference_start: '2026-09-06'
+  conference_end: '2026-09-09'
+  location: Boston, MA, USA
+- acronym: MECO
+  year: 2026
+  extracted_at: '2026-05-12T23:10:12'
+  cfp_url: https://mecoconference.me/
+  submission_deadline: '2026-04-26'
+- acronym: FOCS
+  year: 2026
+  extracted_at: '2026-05-12T23:10:17'
+  cfp_url: https://ieee-focs.org/
+  conference_start: '2026-11-08'
+  conference_end: '2026-11-11'
+  location: New York City, NY, USA
+- acronym: SOSP
+  year: 2026
+  extracted_at: '2026-05-12T23:10:20'
+  cfp_url: https://sigops.org/s/conferences/sosp/2026/
+  conference_start: '2026-09-29'
+  conference_end: '2026-10-02'
+  location: Prague, Czechia
+- acronym: ACM MM
+  year: 2026
+  extracted_at: '2026-05-12T23:10:25'
+  cfp_url: https://2026.acmmm.org/
+  model: sonnet
+- acronym: SPAWC
+  year: 2026
+  extracted_at: '2026-05-12T23:10:29'
+  cfp_url: https://2026.ieeespawc.org/
+  submission_deadline: '2026-04-05'
+  notification_date: '2026-06-14'
+  conference_start: '2026-09-06'
+  conference_end: '2026-09-09'
+  location: Athens, Greece
+- acronym: MobiHoc
+  year: 2026
+  extracted_at: '2026-05-12T23:10:32'
+  cfp_url: https://www.sigmobile.org/mobihoc/2026/
+  submission_deadline: '2026-04-20'
+  notification_date: '2026-08-23'
+  camera_ready: '2026-09-30'
+  conference_start: '2026-11-23'
+  conference_end: '2026-11-26'
+  location: Tokyo, Japan
+  diverged_fields:
+  - abstract_deadline
+- acronym: PIMRC
+  year: 2026
+  extracted_at: '2026-05-12T23:10:36'
+  cfp_url: http://www.ieee-pimrc.org/
+  submission_deadline: '2026-04-16'
+  notification_date: '2026-06-01'
+  camera_ready: '2026-07-01'
+  conference_start: '2026-09-01'
+  conference_end: '2026-09-04'
+  location: Singapore
+- acronym: BCCA
+  year: 2026
+  extracted_at: '2026-05-12T23:10:40'
+  cfp_url: https://bcca-conference.org/2026/
+  submission_deadline: '2026-05-15'
+  notification_date: '2026-06-30'
+  camera_ready: '2026-07-30'
+  conference_start: '2026-11-16'
+  conference_end: '2026-11-20'
+  location: Barcelona, Spain
+- acronym: IEEE ACSOS
+  year: 2026
+  extracted_at: '2026-05-12T23:10:44'
+  cfp_url: https://conf.researchr.org/home/acsos-2026
+  notification_date: '2026-06-15'
+  camera_ready: '2026-07-20'
+  conference_start: '2026-09-07'
+  conference_end: '2026-09-11'
+  location: Cesena, Italy
+- acronym: NSDI
+  year: 2027
+  extracted_at: '2026-05-12T23:10:49'
+  cfp_url: https://www.usenix.org/conference/nsdi27
+  abstract_deadline: '2026-09-10'
+  conference_start: '2027-05-11'
+  conference_end: '2027-05-13'
+  location: Providence, RI, USA
+- acronym: IC2E
+  year: 2026
+  extracted_at: '2026-05-12T23:10:53'
+  cfp_url: https://conferences.computer.org/IC2E/2026/
+  abstract_deadline: '2026-05-08'
+  submission_deadline: '2026-05-15'
+  notification_date: '2026-07-14'
+  camera_ready: '2026-08-01'
+  conference_start: '2026-10-13'
+  conference_end: '2026-10-16'
+  location: Santa Clara, California, USA
+- acronym: CCS
+  year: 2026
+  extracted_at: '2026-05-12T23:10:58'
+  cfp_url: https://www.sigsac.org/ccs/CCS2026/
+  model: sonnet
+- acronym: CLUSTER
+  year: 2026
+  extracted_at: '2026-05-12T23:11:01'
+  cfp_url: https://clustercomp.org/2026/
+  conference_start: '2026-09-22'
+  conference_end: '2026-09-25'
+  location: Alexandria, Virginia, United States of America
+- acronym: Asilomar
+  year: 2026
+  extracted_at: '2026-05-12T23:11:05'
+  cfp_url: https://www.asilomarsscconf.org/
+  location: Pacific Grove, CA, USA
+  diverged_fields:
+  - submission_deadline
+- acronym: ITW
+  year: 2026
+  extracted_at: '2026-05-12T23:11:09'
+  cfp_url: https://2026.ieee-itw.org/
+  submission_deadline: '2026-05-10'
+  notification_date: '2026-07-10'
+  camera_ready: '2026-08-17'
+  conference_start: '2026-11-10'
+  conference_end: '2026-11-13'
+  location: Tempe, Arizona, USA
+- acronym: CNS
+  year: 2026
+  extracted_at: '2026-05-12T23:11:14'
+  cfp_url: http://www.ieee-cns.org/
+  submission_deadline: '2026-05-18'
+  notification_date: '2026-07-18'
+  camera_ready: '2026-08-14'
+  conference_start: '2026-09-14'
+  conference_end: '2026-09-17'
+  location: Newark, Delaware, USA
+- acronym: WSA
+  year: 2026
+  extracted_at: '2026-05-12T23:11:18'
+  cfp_url: https://wsa2026.cttc.es/index.php
+  submission_deadline: '2026-05-14'
+  notification_date: '2026-07-15'
+  camera_ready: '2026-08-15'
+- acronym: ISWCS
+  year: 2026
+  extracted_at: '2026-05-12T23:11:21'
+  cfp_url: http://iswcs.org/iswcs2026/
+  submission_deadline: '2026-05-31'
+  notification_date: '2026-06-30'
+  camera_ready: '2026-07-20'
+  conference_start: '2026-08-24'
+  conference_end: '2026-08-26'
+  location: Gold Coast, Australia
+- acronym: EuroSys
+  year: 2027
+  extracted_at: '2026-05-12T23:11:24'
+  cfp_url: https://2027.eurosys.org/
+  location: Rabat, Morocco
+- acronym: HotOptics
+  year: 2026
+  extracted_at: '2026-05-12T23:11:29'
+  cfp_url: https://conferences.sigcomm.org/sigcomm/2026/hotoptics/
+  submission_deadline: '2026-05-18'
+  notification_date: '2026-06-08'
+  camera_ready: '2026-06-20'
+  conference_start: '2026-08-17'
+  page_limit: 6
+  diverged_fields:
+  - conference_end
+- acronym: ICNP
+  year: 2026
+  extracted_at: '2026-05-12T23:11:33'
+  cfp_url: https://icnp26.cs.ucr.edu/
+  abstract_deadline: '2026-05-15'
+  submission_deadline: '2026-05-22'
+  notification_date: '2026-07-21'
+  camera_ready: '2026-08-25'
+  conference_start: '2026-10-05'
+  conference_end: '2026-10-08'
+  location: Tempe, Arizona, USA
+- acronym: EMNLP
+  year: 2026
+  extracted_at: '2026-05-12T23:11:36'
+  cfp_url: https://2026.emnlp.org/
+  submission_deadline: '2026-05-25'
+  notification_date: '2026-08-20'
+  camera_ready: '2026-09-20'
+  conference_start: '2026-10-24'
+  conference_end: '2026-10-29'
+  location: Budapest, Hungary
+- acronym: ACSAC
+  year: 2026
+  extracted_at: '2026-05-12T23:11:40'
+  cfp_url: https://www.acsac.org/
+  submission_deadline: '2025-05-26'
+  location: Los Angeles, USA
+- acronym: AFT
+  year: 2026
+  extracted_at: '2026-05-12T23:11:43'
+  cfp_url: https://aftconf.github.io/aft26
+  conference_start: '2026-10-06'
+  conference_end: '2026-10-09'
+  location: London, UK
+- acronym: ISAC
+  year: 2026
+  extracted_at: '2026-05-12T23:11:48'
+  cfp_url: https://isac-ieee.org/
+  submission_deadline: '2026-06-01'
+  notification_date: '2026-09-11'
+  camera_ready: '2026-10-09'
+  conference_start: '2026-11-16'
+  conference_end: '2026-11-18'
+  location: Lisbon, Portugal
+- acronym: DISC
+  year: 2026
+  extracted_at: '2026-05-12T23:11:51'
+  cfp_url: https://www.disc-conference.org/wp/disc2026/
+  conference_start: '2026-11-09'
+  conference_end: '2026-11-13'
+  location: Rome, Italy
+- acronym: PIMRC Workshops
+  year: 2026
+  extracted_at: '2026-05-12T23:11:56'
+  cfp_url: https://www.ieee-pimrc.org/
+  submission_deadline: '2026-04-16'
+  notification_date: '2026-06-01'
+  camera_ready: '2026-07-01'
+  conference_start: '2026-09-01'
+  conference_end: '2026-09-04'
+  location: Singapore
+- acronym: SenSys
+  year: 2027
+  extracted_at: '2026-05-12T23:12:00'
+  cfp_url: https://sensys.acm.org/2027/
+  abstract_deadline: '2026-05-29'
+  submission_deadline: '2026-06-05'
+  notification_date: '2026-08-31'
+  location: New York, USA
+  rounds:
+  - round: 1
+    abstract_deadline: '2026-05-29'
+    submission_deadline: '2026-06-05'
+    notification_date: '2026-08-31'
+    camera_ready: null
+  - round: 2
+    abstract_deadline: null
+    submission_deadline: null
+    notification_date: null
+    camera_ready: null
+- acronym: Allerton
+  year: 2026
+  extracted_at: '2026-05-12T23:12:04'
+  cfp_url: https://allerton.csl.illinois.edu/
+  conference_start: '2026-09-15'
+  conference_end: '2026-09-18'
+  diverged_fields:
+  - location
+- acronym: SIGOPS ATC
+  year: 2026
+  extracted_at: '2026-05-12T23:12:07'
+  cfp_url: https://sigops.org/s/conferences/atc/2026/index.html
+  conference_start: '2026-11-15'
+  conference_end: '2026-11-18'
+  location: Shatin, Hong Kong
+- acronym: ICSE
+  year: 2027
+  extracted_at: '2026-05-12T23:12:13'
+  cfp_url: http://www.icse-conferences.org/
+  conference_start: '2026-04-01'
+  location: Rio de Janeiro, Brazil
+  model: sonnet
+- acronym: CCNC
+  year: 2027
+  extracted_at: '2026-05-12T23:12:16'
+  cfp_url: https://ieee-ccnc.org/
+  submission_deadline: '2026-07-01'
+  notification_date: '2026-07-31'
+  camera_ready: '2026-08-31'
+  conference_start: '2027-01-09'
+  conference_end: '2027-01-12'
+  page_limit: 6
+  location: Las Vegas, NV, USA
+- acronym: WIFS
+  year: 2026
+  extracted_at: '2026-05-12T23:12:23'
+  cfp_url: https://wifs2026.utt.fr/
+  conference_start: '2026-12-07'
+  conference_end: '2026-12-11'
+  location: Sendai, Japan
+- acronym: GC Wkshps
+  year: 2026
+  extracted_at: '2026-05-12T23:12:28'
+  cfp_url: https://www.ieee-globecom.org/
+  submission_deadline: '2026-05-03'
+  conference_start: '2026-12-07'
+  conference_end: '2026-12-11'
+  location: Macau, China
+- acronym: NDSS
+  year: 2027
+  extracted_at: '2026-05-12T23:12:32'
+  cfp_url: https://www.ndss-symposium.org/
+  conference_start: '2027-03-22'
+  conference_end: '2027-03-26'
+  location: Seoul, Republic of Korea
+- acronym: VTC-Spring
+  year: 2027
+  extracted_at: '2026-05-12T23:12:35'
+  cfp_url: https://events.vtsociety.org/vtc2026-spring/
+  submission_deadline: '2026-01-04'
+  notification_date: '2026-04-10'
+  camera_ready: '2026-04-17'
+  conference_start: '2026-06-09'
+  conference_end: '2026-06-12'
+  location: Nice, France
+- acronym: WCNC
+  year: 2027
+  extracted_at: '2026-05-12T23:12:41'
+  cfp_url: http://www.ieee-wcnc.org/
+  notification_date: '2026-01-11'
+  camera_ready: '2026-02-07'
+  conference_start: '2026-04-13'
+  conference_end: '2026-04-16'
+  location: Kuala Lumpur, Malaysia
+- acronym: ICMLCN
+  year: 2026
+  extracted_at: '2026-05-12T23:12:45'
+  cfp_url: https://icmlcn2026.ieee-icmlcn.org/
+  submission_deadline: '2025-12-10'
+  notification_date: '2026-02-09'
+  camera_ready: '2026-05-01'
+  conference_start: '2026-06-08'
+  conference_end: '2026-06-11'
+  location: Abu Dhabi, United Arab Emirates
+- acronym: AsiaCCS
+  year: 2027
+  extracted_at: '2026-05-12T23:12:50'
+  cfp_url: https://asiaccs2027.cityu.edu.mo
+  submission_deadline: '2026-08-21'
+  notification_date: '2026-11-13'
+  camera_ready: '2026-12-11'
+  conference_start: '2027-07-12'
+  conference_end: '2027-07-16'
+  rounds:
+  - round: 1
+    abstract_deadline: null
+    submission_deadline: '2026-08-21'
+    notification_date: '2026-11-13'
+    camera_ready: '2026-12-11'
+  - round: 2
+    abstract_deadline: null
+    submission_deadline: '2026-12-11'
+    notification_date: '2027-03-31'
+    camera_ready: '2027-05-07'
+  diverged_fields:
+  - location
+- acronym: USENIX
+  year: 2026
+  extracted_at: '2026-05-12T23:12:58'
+  cfp_url: https://www.usenix.org/conference/usenixsecurity26/
+  conference_start: '2026-08-12'
+  conference_end: '2026-08-14'
+  location: Baltimore, MD, USA
+- acronym: VTC-Fall
+  year: 2027
+  extracted_at: '2026-05-12T23:13:02'
+  cfp_url: https://events.vtsociety.org/vtc2026-fall/
+  submission_deadline: '2026-03-21'
+  notification_date: '2026-05-12'
+  camera_ready: '2026-05-30'
+  conference_start: '2026-09-06'
+  conference_end: '2026-09-09'
+  location: Boston, MA, USA
+- acronym: VLDB
+  year: 2025
+  extracted_at: '2026-05-12T23:13:06'
+  cfp_url: https://vldb.org/2025/
+  conference_start: '2025-09-01'
+  conference_end: '2025-09-05'
+  location: London, UK
+- acronym: ITW
+  year: 2027
+  extracted_at: '2026-05-12T23:13:08'
+  cfp_url: https://2026.ieee-itw.org/
+  submission_deadline: '2026-05-10'
+  notification_date: '2026-07-10'
+  camera_ready: '2026-08-17'
+  conference_start: '2026-11-10'
+  conference_end: '2026-11-13'
+  location: Tempe, Arizona, USA
+- acronym: ICASSP
+  year: 2027
+  extracted_at: '2026-05-12T23:13:12'
+  cfp_url: https://2026.ieeeicassp.org/
+  conference_start: '2026-05-04'
+  conference_end: '2026-05-08'
+  location: Barcelona, Spain
+- acronym: MMSys
+  year: 2027
+  extracted_at: '2026-05-12T23:13:15'
+  cfp_url: https://2027.acmmmsys.org
+  conference_start: '2027-03-30'
+  conference_end: '2027-04-02'
+  location: Ghent, Belgium
+- acronym: CDC
+  year: 2026
+  extracted_at: '2026-05-12T23:13:20'
+  cfp_url: https://cdc2026.ieeecss.org/
+  submission_deadline: '2026-09-18'
+  notification_date: '2026-07-15'
+  rounds:
+  - round: 1
+    abstract_deadline: null
+    submission_deadline: '2026-03-17'
+    notification_date: null
+    camera_ready: null
+  - round: 2
+    abstract_deadline: null
+    submission_deadline: '2026-03-31'
+    notification_date: null
+    camera_ready: null
+- acronym: ACC
+  year: 2026
+  extracted_at: '2026-05-12T23:13:30'
+  cfp_url: https://acc2026.a2c2.org/
+  notification_date: '2026-01-23'
+  camera_ready: '2026-03-13'
+  conference_start: '2026-05-26'
+  conference_end: '2026-05-29'
+  location: New Orleans, Louisiana, United States
+- acronym: ECC
+  year: 2026
+  extracted_at: '2026-05-12T23:13:33'
+  cfp_url: https://ecc26.euca-ecc.org/
+  submission_deadline: '2026-04-10'
+  conference_start: '2026-07-07'
+  conference_end: '2026-07-10'
+  location: Reykjavík, Iceland
+  diverged_fields:
+  - notification_date
+- acronym: HSCC
+  year: 2026
+  extracted_at: '2026-05-12T23:13:37'
+  cfp_url: https://hscc.acm.org/2026/
+  abstract_deadline: '2025-11-06'
+  submission_deadline: '2025-11-13'
+  notification_date: '2026-01-29'
+  camera_ready: '2026-03-22'
+  conference_start: '2026-05-11'
+  conference_end: '2026-05-14'
+  location: Saint Malo, France
+- acronym: HotOS
+  year: 2025
+  extracted_at: '2026-05-12T23:13:40'
+  cfp_url: https://sigops.org/s/conferences/hotos/2025/
+  submission_deadline: '2025-01-15'
+  notification_date: '2025-04-01'
+  camera_ready: '2025-04-20'
+  conference_start: '2025-05-14'
+  conference_end: '2025-05-16'
+- acronym: MLForSys
+  year: 2025
+  extracted_at: '2026-05-12T23:13:47'
+  cfp_url: http://mlforsystems.org/
+  model: sonnet
+- acronym: HotNets
+  year: 2025
+  extracted_at: '2026-05-12T23:13:50'
+  cfp_url: https://conferences.sigcomm.org/hotnets/2025/
+  submission_deadline: '2025-07-09'
+  notification_date: '2025-09-17'
+  location: College Park, MD, USA

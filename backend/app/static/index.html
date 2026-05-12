@@ -4,7 +4,24 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Conference Finder</title>
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+        crossorigin="" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+          crossorigin=""></script>
   <link rel="stylesheet" href="/static/styles.css" />
+  <script>
+    // Apply saved theme before paint to avoid flash-of-wrong-theme.
+    (function () {
+      try {
+        var t = localStorage.getItem("theme")
+              || (window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
+        document.documentElement.setAttribute("data-theme", t);
+      } catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
+    })();
+  </script>
 </head>
 <body>
   <div class="app">
@@ -13,7 +30,16 @@
         <h1>Conference Finder</h1>
         <div class="subtitle" id="subtitle">Control · Networking · ML · Systems</div>
       </div>
-      <div style="display:flex; gap:8px;">
+      <div style="display:flex; gap:8px; align-items:center;">
+        <button class="icon-btn" id="map-btn" title="Where do you want to go?" aria-label="Open world map">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M2 12h20"/>
+            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+          </svg>
+        </button>
+        <button class="icon-btn" id="theme-btn" title="Toggle light/dark mode" aria-label="Toggle theme"></button>
         <button class="subscribe-secondary" id="add-btn">+ Add venue</button>
         <button class="subscribe" id="subscribe-btn">Subscribe to calendar</button>
       </div>
@@ -72,6 +98,7 @@
       <thead>
         <tr>
           <th data-sort="venue">Venue</th>
+          <th data-sort="location">Location</th>
           <th data-sort="areas">Areas</th>
           <th data-sort="tier">Tier</th>
           <th data-sort="abstract_deadline">Abstract</th>
@@ -107,6 +134,26 @@
       <p class="muted" style="margin-top:16px; font-size:12px;">
         Tip: in Google Calendar, use "Other calendars → From URL" and paste the link.
       </p>
+    </div>
+  </div>
+
+  <!-- World map modal -->
+  <div class="modal-backdrop" id="map-modal" style="display:none;">
+    <div class="modal" style="max-width: 920px;">
+      <h3 style="margin-top:0;">Where do you want to go?</h3>
+      <p class="muted" id="map-hint">
+        Click anywhere on the map. Venues sort by distance from that point — closest first.
+        Dots = upcoming venues we know coordinates for (city-center accuracy).
+      </p>
+      <div class="map-wrap">
+        <div id="world-map" role="application" aria-label="World map — click to set a location anchor"></div>
+      </div>
+      <div style="display:flex; gap:8px; margin-top:12px; align-items:center;">
+        <button class="subscribe-secondary" id="map-clear">Clear anchor</button>
+        <span id="map-status" class="muted" style="font-size:12px;"></span>
+        <span style="flex:1;"></span>
+        <button class="close" id="map-close">Close</button>
+      </div>
     </div>
   </div>
 

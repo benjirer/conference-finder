@@ -41,14 +41,17 @@ def ingest_seed() -> dict[str, int]:
     upserted = 0
     with SessionLocal() as db:
         for v in venues:
-            acronym = v.get("acronym")
+            from . import _common as _c
+            acronym = _c.canonical_acronym(v.get("acronym"))
             year = v.get("year")
             if not acronym or not year:
                 continue
-            row = db.query(Conference).filter_by(acronym=acronym, year=year).one_or_none()
+            round_idx = int(v.get("round") or 1)
+            row = db.query(Conference).filter_by(acronym=acronym, year=year, round=round_idx).one_or_none()
             if row is None:
-                row = Conference(acronym=acronym, year=year, name=v.get("name", acronym))
+                row = Conference(acronym=acronym, year=year, round=round_idx, name=v.get("name", acronym))
                 db.add(row)
+                db.flush()
             row.name = v.get("name") or row.name
             if "areas" in v:
                 row.areas = json.dumps(v["areas"])
@@ -76,7 +79,9 @@ def apply_stats() -> dict[str, int]:
     stats = raw.get("stats", {})
     updated = 0
     with SessionLocal() as db:
+        from . import _common as _c
         for acronym, fields in stats.items():
+            acronym = _c.canonical_acronym(acronym)
             rows = db.query(Conference).filter_by(acronym=acronym).all()
             for row in rows:
                 for k, val in fields.items():

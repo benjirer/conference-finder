@@ -6,13 +6,15 @@ from .db import Base
 
 class Conference(Base):
     __tablename__ = "conferences"
-    __table_args__ = (UniqueConstraint("acronym", "year", name="uq_acronym_year"),)
+    __table_args__ = (UniqueConstraint("acronym", "year", "round", name="uq_acronym_year_round"),)
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
 
     acronym: Mapped[str] = mapped_column(String(64), index=True)
     name: Mapped[str] = mapped_column(String(512))
     year: Mapped[int] = mapped_column(Integer, index=True)
+    round: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
+    rounds_total: Mapped[int | None] = mapped_column(Integer, nullable=True)  # e.g. 3 when a venue has 3 review cycles
 
     # JSON-encoded string arrays — kept as TEXT for SQLite simplicity.
     areas: Mapped[str | None] = mapped_column(Text, default="[]")  # control/networking/ml/systems
@@ -37,6 +39,8 @@ class Conference(Base):
     tier: Mapped[str | None] = mapped_column(String(8), nullable=True)  # A*, A, B, C
 
     location: Mapped[str | None] = mapped_column(String(256), nullable=True)
+    latitude: Mapped[float | None] = mapped_column(Float, nullable=True)
+    longitude: Mapped[float | None] = mapped_column(Float, nullable=True)
     website: Mapped[str | None] = mapped_column(String(512), nullable=True)
     cfp_url: Mapped[str | None] = mapped_column(String(512), nullable=True)
 
@@ -56,12 +60,13 @@ class SourceRecord(Base):
     preserves the per-source values so we can detect when aggregators disagree.
     """
     __tablename__ = "source_records"
-    __table_args__ = (UniqueConstraint("acronym", "year", "source", name="uq_acronym_year_source"),)
+    __table_args__ = (UniqueConstraint("acronym", "year", "source", "round", name="uq_acronym_year_source_round"),)
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     acronym: Mapped[str] = mapped_column(String(64), index=True)
     year: Mapped[int] = mapped_column(Integer, index=True)
     source: Mapped[str] = mapped_column(String(32), index=True)
+    round: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
 
     name: Mapped[str | None] = mapped_column(String(512), nullable=True)
     link: Mapped[str | None] = mapped_column(String(512), nullable=True)

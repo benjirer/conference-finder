@@ -31,11 +31,20 @@ _REQUIRED_COLUMNS = {
     "predicted": "BOOLEAN DEFAULT 0",
     "diverged_detail": "TEXT",
     "tier_predicted": "BOOLEAN DEFAULT 0",
+    "round": "INTEGER NOT NULL DEFAULT 1",
+    "rounds_total": "INTEGER",
+    "latitude": "REAL",
+    "longitude": "REAL",
 }
 
 
 def _apply_migrations():
-    """Idempotent column adds for SQLite — keeps existing data on schema upgrades."""
+    """Idempotent column adds for SQLite — keeps existing data on schema upgrades.
+
+    For unique-constraint changes (which SQLite can't ALTER in place), we drop
+    and recreate the conferences table: the DB is fully reproducible from
+    `app.refresh` so this is cheap.
+    """
     with engine.connect() as conn:
         rows = conn.execute(text("PRAGMA table_info(conferences)")).fetchall()
         existing = {r[1] for r in rows}
@@ -44,6 +53,15 @@ def _apply_migrations():
         for col, ddl in _REQUIRED_COLUMNS.items():
             if col not in existing:
                 conn.execute(text(f"ALTER TABLE conferences ADD COLUMN {col} {ddl}"))
+
+        # Detect the old unique constraint (`uq_acronym_year`) — if present, drop
+        # & recreate so the new (acronym, year, round) constraint takes effect.
+        indices = conn.execute(text("PRAGMA index_list(conferences)")).fetchall()
+        has_old = any(r[1] == "uq_acronym_year" for r in indices)
+        has_new = any(r[1] == "uq_acronym_year_round" for r in indices)
+        if has_old and not has_new:
+            conn.execute(text("DROP TABLE conferences"))
+            conn.execute(text("DROP TABLE IF EXISTS source_records"))
         conn.commit()
 
 

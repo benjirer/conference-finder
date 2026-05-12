@@ -61,20 +61,24 @@ def append_and_upsert(venue: dict, source_url: str, diverged_fields: list[str]) 
     raw["venues"].append({**venue, "cfp_url": source_url})
     _save_yaml(raw)
 
+    from . import _common as _c
     now = datetime.utcnow()
+    canon = _c.canonical_acronym(venue.get("acronym"))
     with SessionLocal() as db:
         row = (
             db.query(Conference)
-            .filter_by(acronym=venue.get("acronym"), year=venue.get("year"))
+            .filter_by(acronym=canon, year=venue.get("year"), round=1)
             .one_or_none()
         )
         if row is None:
             row = Conference(
-                acronym=venue.get("acronym"),
+                acronym=canon,
                 year=venue.get("year"),
-                name=venue.get("name") or venue.get("acronym"),
+                round=1,
+                name=venue.get("name") or canon,
             )
             db.add(row)
+            db.flush()
         if "name" in venue and venue["name"]:
             row.name = venue["name"]
         if "areas" in venue and venue["areas"]:
@@ -110,15 +114,18 @@ def ingest_user_added() -> dict[str, int]:
     upserted = 0
     now = datetime.utcnow()
     with SessionLocal() as db:
+        from . import _common as _c
         for v in raw.get("venues", []):
-            acronym = v.get("acronym")
+            acronym = _c.canonical_acronym(v.get("acronym"))
             year = v.get("year")
             if not acronym or not year:
                 continue
-            row = db.query(Conference).filter_by(acronym=acronym, year=year).one_or_none()
+            round_idx = int(v.get("round") or 1)
+            row = db.query(Conference).filter_by(acronym=acronym, year=year, round=round_idx).one_or_none()
             if row is None:
-                row = Conference(acronym=acronym, year=year, name=v.get("name") or acronym)
+                row = Conference(acronym=acronym, year=year, round=round_idx, name=v.get("name") or acronym)
                 db.add(row)
+                db.flush()
             row.name = v.get("name") or row.name
             if "areas" in v:
                 row.areas = json.dumps(v["areas"])

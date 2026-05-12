@@ -1,15 +1,32 @@
-:root {
+:root, [data-theme="dark"] {
   --bg: #0f1115;
   --surface: #161a21;
+  --surface-2: #1c2129;
   --border: #262c36;
   --text: #e6e8eb;
   --muted: #8b94a1;
   --accent: #5aa3ff;
   --warn: #ffb454;
   --danger: #ff6b6b;
+  --row-hover: rgba(255,255,255,0.02);
+}
+[data-theme="light"] {
+  --bg: #f6f7f9;
+  --surface: #ffffff;
+  --surface-2: #f0f2f5;
+  --border: #d8dde4;
+  --text: #1a2030;
+  --muted: #5b6776;
+  --accent: #2563eb;
+  --warn: #c97400;
+  --danger: #d83b3b;
+  --row-hover: rgba(0,0,0,0.03);
 }
 
 * { box-sizing: border-box; }
+
+html { color-scheme: dark; }
+html[data-theme="light"] { color-scheme: light; }
 
 body {
   margin: 0;
@@ -17,7 +34,29 @@ body {
   background: var(--bg);
   color: var(--text);
   font-size: 14px;
+  transition: background-color 0.15s ease, color 0.15s ease;
 }
+
+.icon-btn {
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--border);
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: background-color 0.12s, border-color 0.12s, color 0.12s;
+}
+.icon-btn:hover {
+  background: var(--surface);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.icon-btn svg { width: 18px; height: 18px; display: block; }
 
 .app { max-width: 1400px; margin: 0 auto; padding: 24px; }
 
@@ -137,8 +176,15 @@ th, td {
   vertical-align: top;
   font-size: 13px;
 }
+th[data-sort="venue"], td.venue-cell  { min-width: 280px; }
+th[data-sort="location"], td.location-cell {
+  max-width: 140px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 th {
-  background: #1c2129;
+  background: var(--surface-2);
   color: var(--muted);
   font-weight: 500;
   font-size: 12px;
@@ -153,7 +199,7 @@ th[data-sort] {
 th[data-sort]:hover { color: var(--text); }
 th[data-sort]::after { content: attr(data-indicator); color: var(--accent); margin-left: 4px; }
 th.sort-active { color: var(--text); }
-tbody tr:hover { background: rgba(255,255,255,0.02); }
+tbody tr:hover { background: var(--row-hover); }
 
 .deadline { white-space: nowrap; }
 .deadline.soon { color: var(--warn); font-weight: 500; }
@@ -177,6 +223,56 @@ button.diverged-flag {
   font-family: inherit;
 }
 button.diverged-flag:hover { background: rgba(255,107,107,0.25); }
+
+.map-wrap {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--surface-2);
+  margin-top: 8px;
+}
+#world-map {
+  width: 100%;
+  height: 480px;
+  cursor: crosshair;
+  background: var(--surface-2);
+}
+/* Leaflet attribution / controls — make them readable on both themes. */
+.leaflet-control-attribution {
+  background: var(--surface) !important;
+  color: var(--muted) !important;
+  font-size: 10px !important;
+}
+.leaflet-control-attribution a { color: var(--accent) !important; }
+.leaflet-bar a {
+  background: var(--surface) !important;
+  color: var(--text) !important;
+  border-color: var(--border) !important;
+}
+.leaflet-bar a:hover { background: var(--surface-2) !important; }
+/* Custom marker styles. */
+.venue-pin-marker {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid var(--surface);
+  box-shadow: 0 0 0 1px var(--accent);
+  opacity: 0.8;
+}
+.venue-pin-marker:hover { opacity: 1; transform: scale(1.4); }
+.anchor-marker {
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: var(--danger);
+  border: 3px solid var(--surface);
+  box-shadow: 0 0 0 2px var(--danger), 0 0 16px var(--danger);
+}
+.distance-tag {
+  color: var(--accent);
+  font-size: 11px;
+  margin-left: 6px;
+  font-variant-numeric: tabular-nums;
+}
 
 button.subscribe {
   background: var(--accent);
@@ -209,6 +305,16 @@ button.subscribe-secondary:hover { background: rgba(90,163,255,0.1); }
   border-radius: 4px;
   font-size: 11px;
   margin-left: 6px;
+}
+.round-flag {
+  background: rgba(90,163,255,0.15);
+  color: var(--accent);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  margin-left: 6px;
+  font-weight: 600;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Mono", monospace;
 }
 .deadline.predicted { font-style: italic; color: #c0a0ff; }
 

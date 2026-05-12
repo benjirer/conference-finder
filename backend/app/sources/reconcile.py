@@ -33,13 +33,13 @@ def reconcile() -> dict[str, int]:
 
     with SessionLocal() as db:
         keys = db.execute(
-            select(SourceRecord.acronym, SourceRecord.year).distinct()
+            select(SourceRecord.acronym, SourceRecord.year, SourceRecord.round).distinct()
         ).all()
-        for acronym, year in keys:
+        for acronym, year, round_idx in keys:
             examined += 1
             records = (
                 db.query(SourceRecord)
-                .filter_by(acronym=acronym, year=year)
+                .filter_by(acronym=acronym, year=year, round=round_idx)
                 .all()
             )
             with_deadlines = [r for r in records if r.submission_deadline is not None]
@@ -62,7 +62,7 @@ def reconcile() -> dict[str, int]:
                         })
             conf = (
                 db.query(Conference)
-                .filter_by(acronym=acronym, year=year)
+                .filter_by(acronym=acronym, year=year, round=round_idx)
                 .one_or_none()
             )
             if conf is None:

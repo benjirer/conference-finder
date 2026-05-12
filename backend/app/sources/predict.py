@@ -34,21 +34,23 @@ def predict_next_year() -> dict[str, int]:
     now = datetime.utcnow()
     target_year = now.year + 1
     with SessionLocal() as db:
-        acronyms = [r[0] for r in db.execute(select(Conference.acronym).distinct()).all()]
-        for acronym in acronyms:
+        # Group by (acronym, round) so each round of a multi-round venue gets
+        # its own predicted next-year entry.
+        keys = db.execute(
+            select(Conference.acronym, Conference.round).distinct()
+        ).all()
+        for acronym, round_idx in keys:
             rows = (
                 db.query(Conference)
-                .filter(Conference.acronym == acronym)
+                .filter(Conference.acronym == acronym, Conference.round == round_idx)
                 .order_by(Conference.year.desc())
                 .all()
             )
             if not rows:
                 continue
-            # Skip if any row already exists for target_year (real or predicted).
             if any(r.year == target_year for r in rows):
                 skipped += 1
                 continue
-            # Template = most recent non-predicted row WITH at least one date.
             template = next(
                 (r for r in rows
                  if not r.predicted
@@ -64,6 +66,8 @@ def predict_next_year() -> dict[str, int]:
             new = Conference(
                 acronym=acronym,
                 year=target_year,
+                round=round_idx,
+                rounds_total=template.rounds_total,
                 name=template.name,
                 areas=template.areas,
                 topics=template.topics,
@@ -75,7 +79,7 @@ def predict_next_year() -> dict[str, int]:
                 h5_index=template.h5_index,
                 acceptance_rate=template.acceptance_rate,
                 tier=template.tier,
-                location=None,  # location changes each edition — don't carry over
+                location=None,
                 website=template.website,
                 cfp_url=template.cfp_url,
                 source="predicted",
