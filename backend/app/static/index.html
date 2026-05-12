@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Conference Finder</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div>
+        <h1>Conference Finder</h1>
+        <div class="subtitle" id="subtitle">Control · Networking · ML · Systems</div>
+      </div>
+      <div style="display:flex; gap:8px;">
+        <button class="subscribe-secondary" id="add-btn">+ Add venue</button>
+        <button class="subscribe" id="subscribe-btn">Subscribe to calendar</button>
+      </div>
+    </header>
+
+    <div class="controls">
+      <div class="control-group">
+        <span class="control-label">Search</span>
+        <input type="text" id="q" placeholder="acronym, name, location…" />
+      </div>
+      <div class="control-group">
+        <span class="control-label">Areas</span>
+        <div id="area-chips" class="chip-row"></div>
+      </div>
+      <div class="control-group">
+        <span class="control-label">Workshops</span>
+        <select id="workshops">
+          <option value="all">Include</option>
+          <option value="only">Only</option>
+          <option value="exclude">Exclude</option>
+        </select>
+      </div>
+      <div class="control-group">
+        <span class="control-label">Deadline</span>
+        <select id="deadline">
+          <option value="upcoming">Upcoming</option>
+          <option value="passed">Passed</option>
+          <option value="all">All</option>
+        </select>
+      </div>
+      <div class="control-group">
+        <span class="control-label">Predicted</span>
+        <select id="predicted">
+          <option value="all">Include</option>
+          <option value="only">Only</option>
+          <option value="exclude">Exclude</option>
+        </select>
+      </div>
+      <div class="control-group">
+        <span class="control-label">Diverged</span>
+        <select id="diverged">
+          <option value="all">All</option>
+          <option value="only">Only diverged</option>
+          <option value="exclude">Hide diverged</option>
+        </select>
+      </div>
+      <div class="control-group">
+        <span class="control-label">Year</span>
+        <div id="year-chips" class="chip-row"></div>
+      </div>
+    </div>
+
+    <div id="status" class="muted">Loading…</div>
+
+    <table id="conf-table" style="display:none;">
+      <thead>
+        <tr>
+          <th data-sort="venue">Venue</th>
+          <th data-sort="areas">Areas</th>
+          <th data-sort="tier">Tier</th>
+          <th data-sort="abstract_deadline">Abstract</th>
+          <th data-sort="submission_deadline">Submission</th>
+          <th data-sort="notification_date">Notification</th>
+          <th data-sort="conference_start">Conference</th>
+          <th data-sort="page_limit">Pages</th>
+          <th data-sort="acceptance_rate">Accept</th>
+          <th data-sort="source">Source</th>
+        </tr>
+      </thead>
+      <tbody id="conf-tbody"></tbody>
+    </table>
+  </div>
+
+  <!-- Calendar subscribe modal -->
+  <div class="modal-backdrop" id="modal" style="display:none;">
+    <div class="modal">
+      <h3 style="margin-top:0;">Subscribe to calendar</h3>
+      <p class="muted">
+        Add this URL as a subscribed calendar in Apple Calendar, Google Calendar, or Outlook.
+        It will auto-refresh on your client.
+      </p>
+      <code id="ics-url"></code>
+      <div style="display:flex; gap:8px; margin-top:12px;">
+        <button class="subscribe" id="copy-btn">Copy URL</button>
+        <a class="subscribe" id="download-btn" download="conferences.ics"
+           style="background:var(--accent); color:#0a1018; padding:8px 14px; border-radius:6px; font-weight:600; text-decoration:none;">
+          Download .ics
+        </a>
+        <button class="close" id="close-btn">Close</button>
+      </div>
+      <p class="muted" style="margin-top:16px; font-size:12px;">
+        Tip: in Google Calendar, use "Other calendars → From URL" and paste the link.
+      </p>
+    </div>
+  </div>
+
+  <!-- Per-source breakdown modal -->
+  <div class="modal-backdrop" id="sources-modal" style="display:none;">
+    <div class="modal" style="max-width:720px;">
+      <h3 style="margin-top:0;" id="sources-title">Per-source dates</h3>
+      <p class="muted" id="sources-summary"></p>
+      <div id="sources-table-wrap" style="overflow-x:auto;"></div>
+      <div style="display:flex; gap:8px; margin-top:12px;">
+        <button class="close" id="sources-close">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add-venue modal -->
+  <div class="modal-backdrop" id="add-modal" style="display:none;">
+    <div class="modal">
+      <h3 style="margin-top:0;">Add a venue</h3>
+      <p class="muted">
+        Paste a Call-for-Papers URL. Claude reads the page and extracts the venue
+        info with a two-pass agreement check. The result is appended to
+        <code style="display:inline; padding:1px 4px;">backend/data/user_added.yaml</code>
+        and shown in the table below.
+      </p>
+      <label class="add-label">
+        CFP URL
+        <input type="text" id="add-url" placeholder="https://..." />
+      </label>
+      <label class="add-label">
+        Areas (optional hint)
+        <div id="add-area-chips" class="chip-row"></div>
+      </label>
+      <div id="add-status" class="muted" style="margin-top:8px;"></div>
+      <div style="display:flex; gap:8px; margin-top:12px;">
+        <button class="subscribe" id="add-submit">Extract &amp; add</button>
+        <button class="close" id="add-close">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

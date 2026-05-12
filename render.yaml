@@ -1,0 +1,23 @@
+# Render Blueprint (https://render.com/docs/blueprint-spec).
+# After pushing to GitHub, go to https://dashboard.render.com → New → Blueprint,
+# point it at the repo, and Render will create the service from this file.
+#
+# Pricing: plan=free is genuinely $0/month. Instance sleeps after 15 min idle
+# and disk is ephemeral (wiped on every restart), so we rebuild the DB on
+# startup via `app.refresh`. Cold-start latency is roughly 60 seconds.
+
+services:
+  - type: web
+    name: conference-finder
+    runtime: python
+    plan: free
+    region: frankfurt        # closest free region for Switzerland; switch to oregon/singapore if elsewhere
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: python -m app.refresh && uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/health
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.4"
+      - key: ANTHROPIC_API_KEY
+        sync: false           # set this manually in the Render dashboard if you want LLM-extract / Add-venue

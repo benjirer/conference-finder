@@ -1,0 +1,149 @@
+# Per-acronym overlay applied to every conference row (regardless of source).
+# Edit annually. Values represent typical/recent-year statistics.
+
+stats:
+  # ML
+  NeurIPS:   {h5_index: 337, acceptance_rate: 0.26, page_limit: 9,  format_notes: "9 pages main + unlimited appendix"}
+  ICML:      {h5_index: 254, acceptance_rate: 0.275, page_limit: 8, format_notes: "8 pages main + appendix"}
+  ICLR:      {h5_index: 304, acceptance_rate: 0.31,  page_limit: 9, format_notes: "9 pages main + appendix"}
+  AISTATS:   {h5_index: 71,  acceptance_rate: 0.29,  page_limit: 8}
+  UAI:       {h5_index: 53,  acceptance_rate: 0.28,  page_limit: 9}
+  AAAI:      {h5_index: 220, acceptance_rate: 0.23,  page_limit: 7}
+  IJCAI:     {h5_index: 130, acceptance_rate: 0.14,  page_limit: 7}
+  COLT:      {h5_index: 39,  acceptance_rate: 0.30}
+
+  # Networking
+  SIGCOMM:   {h5_index: 110, acceptance_rate: 0.18, page_limit: 14, format_notes: "14 pages references included"}
+  NSDI:      {h5_index: 86,  acceptance_rate: 0.19, page_limit: 12}
+  IMC:       {h5_index: 64,  acceptance_rate: 0.27, page_limit: 14}
+  CoNEXT:    {h5_index: 41,  acceptance_rate: 0.23, page_limit: 13}
+  MobiCom:   {h5_index: 78,  acceptance_rate: 0.18, page_limit: 14}
+  MobiSys:   {h5_index: 67,  acceptance_rate: 0.19, page_limit: 13}
+  SenSys:    {h5_index: 64,  acceptance_rate: 0.21, page_limit: 13}
+  IPSN:      {h5_index: 41,  acceptance_rate: 0.20, page_limit: 12}
+  INFOCOM:   {h5_index: 110, acceptance_rate: 0.20, page_limit: 9}
+  MMSys:     {h5_index: 26,  acceptance_rate: 0.30, page_limit: 8}
+  ICNP:      {h5_index: 34,  acceptance_rate: 0.18, page_limit: 11}
+
+  # Multimedia
+  MM:        {h5_index: 95,  acceptance_rate: 0.27, page_limit: 8, format_notes: "ACM Multimedia, 8 pages"}
+  MMAsia:    {h5_index: 13,  acceptance_rate: 0.30}
+  ICME:      {h5_index: 44,  acceptance_rate: 0.30, page_limit: 6}
+
+  # Systems
+  SOSP:      {h5_index: 73,  acceptance_rate: 0.17, page_limit: 12}
+  OSDI:      {h5_index: 76,  acceptance_rate: 0.17, page_limit: 13}
+  EuroSys:   {h5_index: 52,  acceptance_rate: 0.18, page_limit: 14}
+  ATC:       {h5_index: 53,  acceptance_rate: 0.19, page_limit: 12}
+  MLSys:     {h5_index: 33,  acceptance_rate: 0.25, page_limit: 12}
+
+  # Robotics / Control
+  ICRA:      {h5_index: 154, acceptance_rate: 0.43, page_limit: 7}
+  IROS:      {h5_index: 113, acceptance_rate: 0.46, page_limit: 7}
+  CoRL:      {h5_index: 60,  acceptance_rate: 0.40, page_limit: 9}
+  RSS:       {h5_index: 56,  acceptance_rate: 0.32, page_limit: 8}
+  CDC:       {h5_index: 76,  acceptance_rate: 0.50, page_limit: 8}
+  ACC:       {h5_index: 60,  acceptance_rate: 0.65, page_limit: 6}
+  ECC:       {h5_index: 31,  acceptance_rate: 0.65, page_limit: 6}
+  L4DC:      {h5_index: 20,  acceptance_rate: 0.33, page_limit: 14}
+  HSCC:      {h5_index: 18,  acceptance_rate: 0.35, page_limit: 10}
+
+  # Workshops
+  HotNets:   {h5_index: 39,  acceptance_rate: 0.25, page_limit: 7}
+  HotOS:     {h5_index: 30,  acceptance_rate: 0.25, page_limit: 7}
+
+  # ─── IEEE Comms / Signal Processing (from klb2 + confsearch). CORE ranks ───
+  ICC:               {tier: B}
+  GLOBECOM:          {tier: B}
+  WCNC:              {tier: B}
+  VTC-Spring:        {tier: B}
+  VTC-Fall:          {tier: B}
+  PIMRC:             {tier: B}
+  ICASSP:            {tier: B,  h5_index: 119}
+  EUSIPCO:           {tier: B}
+  EuCNC:             {tier: B}
+  SPAWC:             {tier: B}
+  ISWCS:             {tier: B}
+  WSA:               {tier: B}
+  CNS:               {tier: B}
+  VNC:               {tier: B}
+  CCNC:              {tier: C}
+  CAMSAP:            {tier: B}
+  WIFS:              {tier: B}
+  CISS:              {tier: B}
+
+  # ─── IEEE Info Theory ───
+  ISIT:              {tier: A,  h5_index: 39}
+  ITW:               {tier: B}
+  Allerton:          {tier: B}
+  Asilomar:          {tier: B}
+
+  # ─── Vehicular / Intelligent Transportation ───
+  ITSC:              {tier: B}
+
+  # ─── Distributed / Systems (extra from ds-deadlines) ───
+  SoCC:              {tier: A,  h5_index: 42}
+  ASPLOS:            {tier: "A*", h5_index: 84}
+  ISCA:              {tier: "A*", h5_index: 84}
+  MICRO:             {tier: "A*", h5_index: 65}
+  HPCA:              {tier: "A*", h5_index: 55}
+  ISPASS:            {tier: B}
+  DEBS:              {tier: A}
+  DSN:               {tier: A,  h5_index: 41}
+  IC2E:              {tier: B}
+  Middleware:        {tier: A,  h5_index: 31}
+  SIGMETRICS:        {tier: "A*", h5_index: 50}
+
+  # ─── Blockchain / Web3 ───
+  AFT:               {tier: B}
+  Blockchain:        {tier: B}
+  ICBC:              {tier: B}
+  BCCA:              {tier: C}
+
+  # ─── Hardware / EDA ───
+  DAC:               {tier: "A*", h5_index: 65}
+  FPGA:              {tier: A,  h5_index: 30}
+  DATE:              {tier: A,  h5_index: 43}
+  ICCAD:             {tier: A,  h5_index: 41}
+
+  # ─── Security ───
+  USENIX Security:   {tier: "A*", h5_index: 100, acceptance_rate: 0.17}
+  CCS:               {tier: "A*", h5_index: 117, acceptance_rate: 0.18}
+  S&P:               {tier: "A*", h5_index: 87,  acceptance_rate: 0.13}
+  NDSS:              {tier: "A*", h5_index: 73,  acceptance_rate: 0.16}
+  EuroS&P:           {tier: A}
+  CODASPY:           {tier: B}
+
+  # ─── DB / Data Mining ───
+  KDD:               {tier: "A*", h5_index: 124, acceptance_rate: 0.19}
+  SIGMOD:            {tier: "A*", h5_index: 99,  acceptance_rate: 0.20}
+  VLDB:              {tier: "A*", h5_index: 98,  acceptance_rate: 0.22}
+  ICDE:              {tier: A,  h5_index: 82}
+  WSDM:              {tier: A,  h5_index: 55}
+  ICDM:              {tier: A,  h5_index: 49}
+  BigData:           {tier: B,  h5_index: 50}
+
+  # ─── PL / SE ───
+  POPL:              {tier: "A*", h5_index: 59}
+  PLDI:              {tier: "A*", h5_index: 56}
+  OOPSLA:            {tier: "A*", h5_index: 52}
+  ICSE:              {tier: "A*", h5_index: 89, acceptance_rate: 0.18}
+  FSE:               {tier: "A*", h5_index: 53}
+  ASE:               {tier: A,  h5_index: 47}
+  ISSTA:             {tier: A,  h5_index: 35}
+
+  # ─── CV / NLP (in case aideadlines didn't supply rank) ───
+  CVPR:              {tier: "A*", h5_index: 389, acceptance_rate: 0.25}
+  ICCV:              {tier: "A*", h5_index: 256, acceptance_rate: 0.25}
+  ECCV:              {tier: "A*", h5_index: 195, acceptance_rate: 0.27}
+  WACV:              {tier: A,  h5_index: 65,  acceptance_rate: 0.40}
+  BMVC:              {tier: B,  h5_index: 38}
+  ACL:               {tier: "A*", h5_index: 192, acceptance_rate: 0.21}
+  EMNLP:             {tier: "A*", h5_index: 168, acceptance_rate: 0.22}
+  NAACL:             {tier: A,  h5_index: 117, acceptance_rate: 0.26}
+  EACL:              {tier: B,  h5_index: 47}
+  COLING:            {tier: A,  h5_index: 62}
+
+  # ─── Robotics (extras) ───
+  HRI:               {tier: A,  h5_index: 38}
+  Humanoids:         {tier: B}

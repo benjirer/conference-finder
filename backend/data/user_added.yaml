@@ -1,0 +1,15 @@
+venues:
+- acronym: HotOptics
+  name: Workshop on Hot Topics in Optical Technologies and Applications in Networking
+  year: 2026
+  is_workshop: true
+  areas:
+  - networking
+  - ml
+  - systems
+  submission_deadline: '2026-05-18'
+  notification_date: '2026-06-08'
+  camera_ready: '2026-06-20'
+  conference_start: '2026-08-17'
+  page_limit: 6
+  cfp_url: https://conferences.sigcomm.org/sigcomm/2026/hotoptics/

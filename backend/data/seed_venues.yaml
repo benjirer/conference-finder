@@ -1,0 +1,134 @@
+# Venues NOT covered by ccfddl. Edit freely — re-run `python -m app.refresh` to apply.
+#
+# Each entry can include:
+#   acronym, name, year, areas (list), is_workshop, parent_venue,
+#   abstract_deadline / submission_deadline / notification_date /
+#   camera_ready / conference_start / conference_end (ISO 8601 — assume UTC),
+#   page_limit, format_notes, location, website, cfp_url, tier, notes.
+#
+# Leave dates `null` when unknown; the LLM-extract step will try to fill them
+# from `cfp_url`. Mark `unverified: true` on entries you want to flag.
+
+venues:
+  # ───────────────────────── Control ─────────────────────────
+  - acronym: CDC
+    name: IEEE Conference on Decision and Control
+    year: 2026
+    areas: [control]
+    tier: A
+    page_limit: 8
+    format_notes: 8 pages incl. references for regular papers
+    website: https://cdc2026.ieeecss.org/
+    cfp_url: https://cdc2026.ieeecss.org/
+    notes: Dates auto-filled by LLM extractor when cfp_url is set.
+
+  - acronym: ACC
+    name: American Control Conference
+    year: 2026
+    areas: [control]
+    tier: A
+    page_limit: 6
+    format_notes: 6 pages standard, +2 for full-paper option
+    website: https://acc2026.a2c2.org/
+    cfp_url: https://acc2026.a2c2.org/
+
+  - acronym: ECC
+    name: European Control Conference
+    year: 2026
+    areas: [control]
+    tier: A
+    page_limit: 6
+    website: https://ecc26.euca-ecc.org/
+    cfp_url: https://ecc26.euca-ecc.org/
+
+  - acronym: L4DC
+    name: Learning for Dynamics and Control
+    year: 2026
+    areas: [control, ml]
+    tier: A
+    page_limit: 14
+    format_notes: 14 pages proceedings track + 4 pages references/appendix
+    website: https://l4dc.web.ox.ac.uk/
+    cfp_url: https://l4dc.web.ox.ac.uk/
+
+  - acronym: HSCC
+    name: "Hybrid Systems: Computation and Control"
+    year: 2026
+    areas: [control, systems]
+    tier: A
+    page_limit: 10
+    website: https://hscc.acm.org/2026/
+    cfp_url: https://hscc.acm.org/2026/
+
+  # ───────────────── Systems (not in ccfddl) ─────────────────
+  - acronym: SOSP
+    name: ACM Symposium on Operating Systems Principles
+    year: 2026
+    areas: [systems]
+    tier: "A*"
+    page_limit: 12
+    website: https://sigops.org/s/conferences/sosp/2026/
+    cfp_url: https://sigops.org/s/conferences/sosp/2026/
+
+  - acronym: OSDI
+    name: USENIX Symposium on Operating Systems Design and Implementation
+    year: 2026
+    areas: [systems]
+    tier: "A*"
+    page_limit: 13
+    website: https://www.usenix.org/conference/osdi26
+    cfp_url: https://www.usenix.org/conference/osdi26
+
+  # ───────────────── Workshops co-located with major venues ─────────────────
+  # Workshops at SOSP — edit URLs/dates and re-run refresh.
+  - acronym: PACMI
+    name: "PACMI @ SOSP (please verify acronym & URL)"
+    year: 2026
+    areas: [systems]
+    is_workshop: true
+    parent_venue: SOSP
+    cfp_url: null
+    notes: |
+      Placeholder for the SOSP workshop the user requested. Please fill in
+      cfp_url with the official workshop page; the refresh script will then
+      auto-extract deadlines.
+
+  - acronym: HotOS
+    name: Hot Topics in Operating Systems
+    year: 2025
+    areas: [systems]
+    is_workshop: true
+    parent_venue: SOSP
+    page_limit: 7
+    website: https://sigops.org/s/conferences/hotos/2025/
+    cfp_url: https://sigops.org/s/conferences/hotos/2025/
+
+  # ML-for-Systems workshops
+  - acronym: MLForSys
+    name: ML for Systems Workshop
+    year: 2025
+    areas: [ml, systems]
+    is_workshop: true
+    parent_venue: NeurIPS
+    cfp_url: http://mlforsystems.org/
+
+  # Networking-adjacent workshops
+  - acronym: HotNets
+    name: ACM Workshop on Hot Topics in Networks
+    year: 2025
+    areas: [networking]
+    is_workshop: true
+    parent_venue: SIGCOMM
+    tier: B
+    page_limit: 7
+    website: https://conferences.sigcomm.org/hotnets/2025/
+    cfp_url: https://conferences.sigcomm.org/hotnets/2025/
+
+  - acronym: NetAI
+    name: Workshop on Network-Application Integration / AI for Networking
+    year: 2025
+    areas: [networking, ml]
+    is_workshop: true
+    parent_venue: SIGCOMM
+    cfp_url: null
+    notes: Verify exact name and CFP URL.
