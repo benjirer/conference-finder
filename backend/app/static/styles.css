@@ -160,13 +160,19 @@ h1 { margin: 0; font-size: 22px; font-weight: 600; }
 .tier-C     { background: #8b94a1; color: #0a0d12; }
 .tier-pred  { opacity: 0.6; font-style: italic; }
 
-table {
+.table-scroll {
   width: 100%;
-  border-collapse: collapse;
-  background: var(--surface);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;   /* momentum scroll on iOS */
   border: 1px solid var(--border);
   border-radius: 8px;
-  overflow: hidden;
+  background: var(--surface);
+}
+
+table {
+  width: 100%;
+  min-width: 1100px;                   /* keep columns legible; container scrolls when viewport is narrower */
+  border-collapse: collapse;
 }
 
 th, td {
@@ -272,6 +278,48 @@ button.diverged-flag:hover { background: rgba(255,107,107,0.25); }
   font-size: 11px;
   margin-left: 6px;
   font-variant-numeric: tabular-nums;
+}
+
+/* ────────────────────── mobile ────────────────────── */
+@media (max-width: 720px) {
+  .app { padding: 12px; }
+  header { gap: 8px; }
+  header h1 { font-size: 18px; }
+  header > div:last-child {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+  .subscribe, .subscribe-secondary {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+
+  /* Filter bar stacks to single column. */
+  .controls {
+    grid-template-columns: 1fr;
+    padding: 12px;
+    gap: 12px;
+  }
+  .controls input[type="text"] { min-width: 0; }
+
+  /* Table needs more aggressive scroll affordance. */
+  .table-scroll {
+    /* Bleed to viewport edges so the scroll area feels bigger. */
+    margin: 0 -12px;
+    border-left: none;
+    border-right: none;
+    border-radius: 0;
+  }
+  table { min-width: 980px; font-size: 12px; }
+  th, td { padding: 8px 10px; }
+
+  /* Modals get the full screen on phones. */
+  .modal {
+    width: 96%;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  #world-map { height: 360px; }
 }
 
 button.subscribe {
