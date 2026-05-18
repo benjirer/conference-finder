@@ -17,10 +17,12 @@ venues:
     areas: [control]
     tier: A
     page_limit: 8
-    format_notes: 8 pages incl. references for regular papers
+    format_notes: |
+      8 pages incl. references. Two submission tracks with different deadlines:
+      R1 = L-CSS-with-CDC-option, R2 = Regular + Invited Session papers.
+    location: Honolulu, Hawaii, USA
     website: https://cdc2026.ieeecss.org/
-    cfp_url: https://cdc2026.ieeecss.org/
-    notes: Dates auto-filled by LLM extractor when cfp_url is set.
+    cfp_url: https://cdc2026.ieeecss.org/authors/author-information
 
   - acronym: ACC
     name: American Control Conference

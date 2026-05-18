@@ -44,23 +44,29 @@ def _run(label, fn):
 
 def main():
     init_db()
-    _run("[ 1/17] confsearch.ethz.ch",       confsearch.ingest_all)
-    _run("[ 2/17] noise-lab",                noise_lab.ingest_all)
-    _run("[ 3/17] klb2/conference-calendar", klb2.ingest_all)
-    _run("[ 4/17] ds-deadlines",             ds_deadlines.ingest_all)
-    _run("[ 5/17] aideadlines",              aideadlines.ingest_all)
-    _run("[ 6/17] ccfddl",                   ccfddl.ingest_all)
-    _run("[ 7/17] seed YAML",                seed.ingest_seed)
-    _run("[ 8/17] user_added YAML",          user_venues.ingest_user_added)
-    _run("[ 9/17] cleanup old years",        cleanup.cleanup_old_years)
-    _run("[10/17] stats overlay",            seed.apply_stats)
-    _run("[11/17] cached LLM extras",        cached_extras.apply_cached_extras)
-    _run("[12/17] LLM enrichment",           llm_extract.enrich_seed_venues)
-    _run("[13/17] classify missing areas",   areas_classify.classify_missing_areas)
-    _run("[14/17] geocode locations",        geocode.assign_coordinates)
-    _run("[15/17] reconcile",                reconcile.reconcile)
-    _run("[16/17] predict next-year",        predict.predict_next_year)
-    _run("[17/17] predict missing tiers",    tier_predict.predict_tiers)
+    _run("[ 1/16] confsearch.ethz.ch",       confsearch.ingest_all)
+    _run("[ 2/16] noise-lab",                noise_lab.ingest_all)
+    _run("[ 3/16] klb2/conference-calendar", klb2.ingest_all)
+    _run("[ 4/16] ds-deadlines",             ds_deadlines.ingest_all)
+    _run("[ 5/16] aideadlines",              aideadlines.ingest_all)
+    _run("[ 6/16] ccfddl",                   ccfddl.ingest_all)
+    _run("[ 7/16] seed YAML",                seed.ingest_seed)
+    _run("[ 8/16] user_added YAML",          user_venues.ingest_user_added)
+    _run("[ 9/16] cleanup old years",        cleanup.cleanup_old_years)
+    _run("[10/16] stats overlay",            seed.apply_stats)
+    _run("[11/16] cached LLM extras",        cached_extras.apply_cached_extras)
+    # The live `llm_extract.enrich_seed_venues` step was removed from the refresh
+    # pipeline on purpose: it ran on every Render cold start and burned ~30 Anthropic
+    # API calls per wake. Coverage is provided instead by the locally-curated
+    # `cached_extras.yaml` (step 11). To refresh enrichment data, run
+    # `python -m app.enrich_extras` locally and commit the updated cache.
+    # The `+ Add venue` flow still uses `llm_extract.extract_full_venue` on demand,
+    # which is fine because it's user-triggered, not automatic.
+    _run("[12/16] classify missing areas",   areas_classify.classify_missing_areas)
+    _run("[13/16] geocode locations",        geocode.assign_coordinates)
+    _run("[14/16] reconcile",                reconcile.reconcile)
+    _run("[15/16] predict next-year",        predict.predict_next_year)
+    _run("[16/16] predict missing tiers",    tier_predict.predict_tiers)
 
 
 if __name__ == "__main__":

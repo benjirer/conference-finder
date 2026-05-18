@@ -509,7 +509,6 @@ entries:
   extracted_at: '2026-05-12T22:58:59'
   cfp_url: https://kdd2025.kdd.org/
   abstract_deadline: '2025-02-03'
-  submission_deadline: '2025-02-10'
   notification_date: '2025-05-16'
   conference_start: '2025-08-03'
   conference_end: '2025-08-07'
@@ -833,7 +832,6 @@ entries:
   extracted_at: '2026-05-12T23:01:41'
   cfp_url: https://sensys.acm.org/2026/
   abstract_deadline: '2025-11-06'
-  submission_deadline: '2025-11-13'
   notification_date: '2026-01-29'
   camera_ready: '2026-03-31'
   conference_start: '2026-05-11'
@@ -2086,7 +2084,6 @@ entries:
   year: 2026
   extracted_at: '2026-05-12T23:13:20'
   cfp_url: https://cdc2026.ieeecss.org/
-  submission_deadline: '2026-09-18'
   notification_date: '2026-07-15'
   rounds:
   - round: 1
