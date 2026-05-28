@@ -15,9 +15,14 @@ events are extrapolated from prior years.
 """
 from __future__ import annotations
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from .models import Conference
+
+
+def _utc_now() -> datetime:
+    """Naive UTC datetime — replaces deprecated `datetime.utcnow()`."""
+    return datetime.now(timezone.utc).replace(tzinfo=None)
 
 
 def _esc(s: str | None) -> str:
@@ -77,7 +82,7 @@ def _deadline_events(c: Conference, when: datetime, label: str) -> list[str]:
     """Emit BOTH an all-day event on the deadline date AND a 1-hour timed event
     ending exactly at the deadline. Two events per deadline."""
     uid_base = f"{c.acronym}-{c.year}-r{c.round}-{label.lower().replace(' ', '_').replace('-', '_')}"
-    stamp = _dt_utc(datetime.utcnow())
+    stamp = _dt_utc(_utc_now())
     summary = _summary(c, label)
     desc = _description(c, when, label)
 
@@ -123,7 +128,7 @@ def _conference_event(c: Conference) -> list[str]:
     lines = [
         "BEGIN:VEVENT",
         f"UID:{uid}",
-        f"DTSTAMP:{_dt_utc(datetime.utcnow())}",
+        f"DTSTAMP:{_dt_utc(_utc_now())}",
         f"DTSTART;VALUE=DATE:{_date(c.conference_start)}",
         f"DTEND;VALUE=DATE:{_date(end)}",
         f"SUMMARY:{_esc(summary)}",

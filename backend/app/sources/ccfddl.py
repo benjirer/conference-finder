@@ -133,12 +133,10 @@ def _parse_conf_date_range(date_str: str | None, year: int) -> tuple[datetime | 
 
 def fetch_ccfddl_venue(category: str, filename: str) -> dict | None:
     url = f"{CCFDDL_RAW}/{category}/{filename}"
-    try:
-        r = httpx.get(url, timeout=20.0)
-        r.raise_for_status()
-    except httpx.HTTPError:
+    r = _common.http_get(url, timeout=20.0)
+    if r is None:
         return None
-    docs = yaml.safe_load(r.text)
+    docs = _common.safe_yaml_load_text(r.text, None)
     if not docs:
         return None
     return docs[0] if isinstance(docs, list) else docs
@@ -146,7 +144,7 @@ def fetch_ccfddl_venue(category: str, filename: str) -> dict | None:
 
 def ingest_all() -> dict[str, int]:
     """Pull all configured ccfddl venues; upsert the latest two years for each."""
-    now = datetime.utcnow()
+    now = _common.utc_now()
     upserted = 0
     errors = 0
     with SessionLocal() as db:

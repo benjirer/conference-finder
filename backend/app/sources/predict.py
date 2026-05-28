@@ -14,6 +14,7 @@ from sqlalchemy import select
 
 from ..db import SessionLocal
 from ..models import Conference
+from . import _common
 
 _DATE_FIELDS = (
     "abstract_deadline", "submission_deadline", "notification_date",
@@ -31,7 +32,7 @@ def predict_next_year() -> dict[str, int]:
     added = 0
     skipped = 0
     skipped_nodates = 0
-    now = datetime.utcnow()
+    now = _common.utc_now()
     target_year = now.year + 1
     with SessionLocal() as db:
         # Group by (acronym, round) so each round of a multi-round venue gets

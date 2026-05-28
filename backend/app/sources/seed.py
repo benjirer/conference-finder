@@ -10,6 +10,7 @@ from dateutil import parser as dparser
 
 from ..db import SessionLocal
 from ..models import Conference
+from . import _common
 
 DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
 SEED_FILE = DATA_DIR / "seed_venues.yaml"
@@ -35,9 +36,10 @@ def _parse_iso(value):
 def ingest_seed() -> dict[str, int]:
     if not SEED_FILE.exists():
         return {"upserted": 0}
-    raw = yaml.safe_load(SEED_FILE.read_text()) or {}
-    venues = raw.get("venues", [])
-    now = datetime.utcnow()
+    from . import _common as _c
+    raw = _c.safe_yaml_load(SEED_FILE, {})
+    venues = raw.get("venues", []) if isinstance(raw, dict) else []
+    now = _common.utc_now()
     upserted = 0
     with SessionLocal() as db:
         for v in venues:
@@ -75,8 +77,9 @@ def apply_stats() -> dict[str, int]:
     """Overlay stats (h5_index, acceptance_rate, page_limit, format_notes) keyed by acronym."""
     if not STATS_FILE.exists():
         return {"updated": 0}
-    raw = yaml.safe_load(STATS_FILE.read_text()) or {}
-    stats = raw.get("stats", {})
+    from . import _common as _c
+    raw = _c.safe_yaml_load(STATS_FILE, {})
+    stats = raw.get("stats", {}) if isinstance(raw, dict) else {}
     updated = 0
     with SessionLocal() as db:
         from . import _common as _c

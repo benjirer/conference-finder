@@ -20,6 +20,7 @@ from dateutil import parser as dparser
 
 from ..db import SessionLocal
 from ..models import Conference
+from . import _common
 
 DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
 CACHE_FILE = DATA_DIR / "cached_extras.yaml"
@@ -65,16 +66,15 @@ def _fill_row(row: Conference, entry: dict) -> int:
 def apply_cached_extras() -> dict[str, int]:
     if not CACHE_FILE.exists():
         return {"applied": 0, "reason": "no cached_extras.yaml"}
-    raw = yaml.safe_load(CACHE_FILE.read_text()) or {}
-    entries = raw.get("entries", [])
+    raw = _common.safe_yaml_load(CACHE_FILE, {})
+    entries = raw.get("entries", []) if isinstance(raw, dict) else []
     applied = 0
     rounds_added = 0
     fields_updated = 0
 
-    from . import _common as _c
     with SessionLocal() as db:
         for entry in entries:
-            acronym = _c.canonical_acronym(entry.get("acronym"))
+            acronym = _common.canonical_acronym(entry.get("acronym"))
             year = entry.get("year")
             if not acronym or not year:
                 continue
@@ -111,7 +111,7 @@ def apply_cached_extras() -> dict[str, int]:
                             cfp_url=template.cfp_url,
                             website=template.website,
                             source="llm_extract",
-                            last_verified=datetime.utcnow(),
+                            last_verified=_common.utc_now(),
                         )
                         db.add(row)
                         db.flush()

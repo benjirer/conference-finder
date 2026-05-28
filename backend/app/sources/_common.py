@@ -14,10 +14,91 @@ import re
 from datetime import datetime, timedelta, timezone
 from typing import Any, Iterable
 
+import logging
+import time
+from datetime import timezone as _tz
+from pathlib import Path
+
+import httpx
+import yaml
 from sqlalchemy import select
 
 from ..db import SessionLocal
 from ..models import Conference, SourceRecord
+
+
+def utc_now():
+    """Naive UTC datetime — replaces deprecated `datetime.utcnow()`.
+
+    The whole codebase stores naive UTC datetimes (no tzinfo) in SQLite.
+    Centralising the call avoids a deprecation warning on each use.
+    """
+    from datetime import datetime
+    return datetime.now(_tz.utc).replace(tzinfo=None)
+
+log = logging.getLogger("conference_finder")
+
+# ────────────────────────── safe network + filesystem helpers ──────────────────────────
+
+DEFAULT_UA = "Mozilla/5.0 (compatible; conference-finder/0.3)"
+
+
+def http_get(url: str, *, timeout: float = 30.0, retries: int = 2,
+             backoff: float = 0.8, headers: dict | None = None) -> httpx.Response | None:
+    """GET with retries on transient errors (5xx + connection failures).
+
+    Returns the Response on the first 2xx response, or None if all attempts
+    fail. Designed so every aggregator can use one consistent retry policy
+    rather than each rolling its own.
+    """
+    merged_headers = {"User-Agent": DEFAULT_UA}
+    if headers:
+        merged_headers.update(headers)
+    last_err: Exception | None = None
+    for attempt in range(retries + 1):
+        try:
+            r = httpx.get(url, timeout=timeout, follow_redirects=True, headers=merged_headers)
+        except httpx.HTTPError as e:
+            last_err = e
+        else:
+            # Retry on 5xx; treat 4xx as permanent.
+            if r.status_code < 500:
+                if r.is_success:
+                    return r
+                # 4xx — give up immediately, don't waste retries.
+                log.debug("http_get %s -> %s (no retry on 4xx)", url, r.status_code)
+                return None
+            last_err = httpx.HTTPStatusError(f"{r.status_code}", request=r.request, response=r)
+        if attempt < retries:
+            time.sleep(backoff * (2 ** attempt))
+    log.debug("http_get %s gave up after %d retries: %s", url, retries, last_err)
+    return None
+
+
+def safe_yaml_load(path: Path, default):
+    """Load a YAML file, returning `default` on any parse error or missing file.
+
+    Never raises. Used by every cache/overlay loader so a single corrupted YAML
+    can't take down the refresh pipeline.
+    """
+    if not path.exists():
+        return default
+    try:
+        raw = yaml.safe_load(path.read_text())
+    except (yaml.YAMLError, OSError) as e:
+        log.warning("safe_yaml_load(%s): %s — falling back to default", path, e)
+        return default
+    return raw if raw is not None else default
+
+
+def safe_yaml_load_text(text: str, default):
+    """Parse a YAML string; return default on error. For inline text already fetched over HTTP."""
+    try:
+        raw = yaml.safe_load(text)
+    except yaml.YAMLError as e:
+        log.warning("safe_yaml_load_text failed: %s", e)
+        return default
+    return raw if raw is not None else default
 
 
 _TIER_MAP = {
@@ -103,6 +184,31 @@ def canonical_acronym(raw: str | None) -> str | None:
     return _ALIASES.get(s.lower(), s)
 
 
+def normalize_person_name(name: str | None) -> str:
+    """Collapse a person name to a form usable for cross-venue intersection.
+
+    Lower-cases, strips accents, drops middle initials and dots, collapses spaces.
+    Doesn't try to handle "Last, First" vs "First Last" — assume the source uses
+    a consistent ordering. False positives ("J. Wang" matching two different
+    Wangs) are filtered downstream by also showing affiliation.
+    """
+    if not name:
+        return ""
+    import unicodedata
+    s = unicodedata.normalize("NFKD", str(name))
+    s = "".join(c for c in s if not unicodedata.combining(c))  # strip accents
+    s = s.lower()
+    s = re.sub(r"[.\-_,]", " ", s)
+    s = re.sub(r"\s+", " ", s).strip()
+    tokens = s.split()
+    # Drop single-letter "middle initials" only when ≥2 multi-letter tokens remain.
+    # Otherwise "J. Smith" would collapse to just "smith" and false-match any Smith.
+    long_tokens = [t for t in tokens if len(t) > 1]
+    if len(long_tokens) >= 2:
+        return " ".join(long_tokens)
+    return " ".join(tokens)
+
+
 def min_year() -> int:
     """Earliest conference year worth keeping. Anything older is pruned on
     ingest and dropped from the canonical / source_records tables by the
@@ -110,7 +216,7 @@ def min_year() -> int:
     onward (so today is 2026 → keep 2025+; this still surfaces venues whose
     submission_deadline has passed but whose conference instance was the
     most recent prior edition)."""
-    return datetime.utcnow().year - 1
+    return utc_now().year - 1
 
 
 def _tz_offset_hours(tz_str: str | None) -> int:

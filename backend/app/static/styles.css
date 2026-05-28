@@ -81,7 +81,7 @@ h1 { margin: 0; font-size: 22px; font-weight: 600; }
   border: 1px solid var(--border);
   border-radius: 8px;
   margin-bottom: 16px;
-  align-items: end;
+  align-items: start;
 }
 @media (max-width: 1100px) {
   .controls { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
@@ -182,12 +182,67 @@ th, td {
   vertical-align: top;
   font-size: 13px;
 }
-th[data-sort="venue"], td.venue-cell  { min-width: 280px; }
+/* Compare column is hidden by default — only visible when body has `.compare-mode`. */
+th.compare-col, td.compare-col { display: none; width: 32px; padding-left: 8px; padding-right: 4px; }
+body.compare-mode th.compare-col,
+body.compare-mode td.compare-col { display: table-cell; }
+
+td.compare-cell input[type="checkbox"] { cursor: pointer; transform: scale(1.1); }
+td.compare-cell .no-pc { color: var(--muted); font-size: 11px; cursor: help; }
+
+tbody tr.compare-selected { background: rgba(90,163,255,0.08); }
+tbody tr.compare-selected:hover { background: rgba(90,163,255,0.12); }
+
+/* "Compare PCs" button visual states. */
+button.subscribe-secondary.compare-active {
+  background: var(--accent);
+  color: #0a1018;
+}
+button.subscribe-secondary.compare-active:disabled {
+  background: transparent;
+  color: var(--accent);
+}
+
+button.subscribe-secondary[disabled] {
+  opacity: 0.45;
+  cursor: not-allowed;
+  border-color: var(--border);
+  color: var(--muted);
+}
+
+.pc-pair-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 6px;
+  margin-top: 8px;
+}
+.pc-pair {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 12px;
+}
+.pc-pair .count {
+  color: var(--accent);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+th[data-sort="venue"], td.venue-cell  { min-width: 260px; }
 th[data-sort="location"], td.location-cell {
   max-width: 140px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  overflow-wrap: anywhere;   /* wrap mid-word for super-long single tokens */
+  word-break: break-word;
+}
+/* Source column — short label + a small last-verified date underneath.
+   Capped so the table doesn't overflow horizontally; content wraps when long. */
+th[data-sort="source"], td.source-cell {
+  max-width: 90px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 th {
   background: var(--surface-2);

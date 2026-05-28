@@ -56,18 +56,18 @@ def _to_dt(val) -> datetime | None:
 
 
 def _fetch_file(filename: str) -> list | None:
+    r = _common.http_get(f"{GH_API}/{filename}")
+    if r is None:
+        return None
     try:
-        r = httpx.get(f"{GH_API}/{filename}", timeout=30.0)
-        r.raise_for_status()
         meta = r.json()
         content = base64.b64decode(meta["content"]).decode()
-    except (httpx.HTTPError, KeyError, ValueError):
+    except (KeyError, ValueError):
         return None
-    import yaml
-    try:
-        return yaml.safe_load(content) or []
-    except yaml.YAMLError:
+    parsed = _common.safe_yaml_load_text(content, None)
+    if parsed is None:
         return None
+    return parsed if isinstance(parsed, list) else []
 
 
 def ingest_all() -> dict[str, int]:

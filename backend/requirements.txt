@@ -7,3 +7,7 @@ python-dateutil==2.9.0
 pydantic==2.10.3
 anthropic==0.40.0
 selectolax==0.3.27
+
+# Test deps — installed via `pip install -r requirements.txt` so tests run on
+# Render too. Keeping pytest in the main requirements is fine for a small app.
+pytest==8.3.4

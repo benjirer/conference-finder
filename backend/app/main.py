@@ -1,25 +1,95 @@
 from __future__ import annotations
 
-import json
-from datetime import datetime
+import collections
 import hashlib
+import json
+import logging
+import time
+from datetime import datetime
 from pathlib import Path
+from urllib.parse import urlparse
 
-from fastapi import Depends, FastAPI, HTTPException, Query, Response
+from fastapi import Depends, FastAPI, HTTPException, Query, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, field_validator
 from sqlalchemy.orm import Session
 
 from .db import get_db, init_db
 from .ical import build_ics
-from .models import Conference, SourceRecord
+from .models import Conference, PCMember, SourceRecord
 from .sources import llm_extract, user_venues
+
+log = logging.getLogger("conference_finder")
 
 STATIC_DIR = Path(__file__).parent / "static"
 
-app = FastAPI(title="Conference Finder")
+# ────────────────────────── rate limiting + URL validation ──────────────────────────
+
+ADD_VENUE_WINDOW_SEC = 3600   # 1 hour
+ADD_VENUE_MAX_PER_WINDOW = 5  # per client IP
+
+# {ip: deque[timestamps]} — in-process token bucket. Reset on container restart,
+# which is fine: each Render cold start gives us a fresh quota.
+_add_venue_hits: dict[str, collections.deque] = {}
+
+
+def _client_ip(req: Request) -> str:
+    """Best-effort client IP. Render sets X-Forwarded-For; fall back to peer."""
+    xff = req.headers.get("x-forwarded-for")
+    if xff:
+        return xff.split(",")[0].strip()
+    return req.client.host if req.client else "unknown"
+
+
+def _enforce_add_venue_rate_limit(req: Request) -> None:
+    ip = _client_ip(req)
+    now = time.time()
+    dq = _add_venue_hits.setdefault(ip, collections.deque())
+    while dq and dq[0] < now - ADD_VENUE_WINDOW_SEC:
+        dq.popleft()
+    if len(dq) >= ADD_VENUE_MAX_PER_WINDOW:
+        retry_in = int(dq[0] + ADD_VENUE_WINDOW_SEC - now)
+        raise HTTPException(
+            status_code=429,
+            detail=f"Rate limit: max {ADD_VENUE_MAX_PER_WINDOW} adds per hour. Retry in ~{retry_in}s.",
+        )
+    dq.append(now)
+
+
+def _validate_cfp_url(url: str) -> str:
+    """Reject obviously-bad URLs before burning any tokens."""
+    if not isinstance(url, str):
+        raise HTTPException(status_code=422, detail="url must be a string")
+    url = url.strip()
+    if len(url) < 8 or len(url) > 2048:
+        raise HTTPException(status_code=422, detail="url length out of range (8..2048 chars)")
+    p = urlparse(url)
+    if p.scheme not in {"http", "https"}:
+        raise HTTPException(status_code=422, detail="url must start with http:// or https://")
+    if not p.netloc or "." not in p.netloc:
+        raise HTTPException(status_code=422, detail="url must include a real hostname")
+    # Block obvious local / internal hosts to prevent SSRF abuse.
+    host = p.hostname or ""
+    if host in {"localhost"} or host.startswith("127.") or host.startswith("10.") \
+       or host.startswith("192.168.") or host.endswith(".local") or host.endswith(".internal"):
+        raise HTTPException(status_code=422, detail="url must point to a public hostname")
+    return url
+
+
+from contextlib import asynccontextmanager
+
+
+@asynccontextmanager
+async def _lifespan(app: FastAPI):
+    """FastAPI lifespan event — runs once on startup, replaces the deprecated
+    `@app.on_event('startup')` pattern."""
+    init_db()
+    yield
+
+
+app = FastAPI(title="Conference Finder", lifespan=_lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -29,11 +99,6 @@ app.add_middleware(
 )
 
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
-
-
-@app.on_event("startup")
-def _startup():
-    init_db()
 
 
 def _asset_version() -> str:
@@ -56,7 +121,7 @@ def root():
     return HTMLResponse(html, headers={"Cache-Control": "no-cache, max-age=0"})
 
 
-def _serialize(c: Conference) -> dict:
+def _serialize(c: Conference, pc_members_count: int = 0) -> dict:
     def iso(dt: datetime | None):
         return dt.isoformat() if dt else None
     return {
@@ -88,6 +153,8 @@ def _serialize(c: Conference) -> dict:
         "longitude": c.longitude,
         "website": c.website,
         "cfp_url": c.cfp_url,
+        "pc_url": c.pc_url,
+        "pc_members_count": pc_members_count,
         "source": c.source,
         "last_verified": iso(c.last_verified),
         "diverged": c.diverged,
@@ -107,9 +174,10 @@ def _filter(
     year: list[int] | None,
     q: str | None,
 ) -> list[Conference]:
+    from .sources import _common as _c
     rows = db.query(Conference).all()
     out = []
-    now = datetime.utcnow()
+    now = _c.utc_now()
     for r in rows:
         r_areas = json.loads(r.areas or "[]")
         if area and not (set(area) & set(r_areas)):
@@ -160,7 +228,19 @@ def list_conferences(
     q: str | None = Query(default=None),
 ):
     rows = _filter(db, area, workshops, deadline, predicted, diverged, year, q)
-    return [_serialize(r) for r in rows]
+    # PC members are stored on round=1 rows; reflect the same count on every
+    # round of the same (acronym, year) so the UI can show "has PC data" on
+    # any row.
+    from sqlalchemy import func
+    pc_rows = (
+        db.query(Conference.acronym, Conference.year, func.count(PCMember.id))
+        .join(PCMember, PCMember.conference_id == Conference.id)
+        .filter(Conference.round == 1)
+        .group_by(Conference.acronym, Conference.year)
+        .all()
+    )
+    pc_count_by_key = {(a, y): n for a, y, n in pc_rows}
+    return [_serialize(r, pc_count_by_key.get((r.acronym, r.year), 0)) for r in rows]
 
 
 @app.get("/api/years")
@@ -206,6 +286,124 @@ def conference_sources(conf_id: int, db: Session = Depends(get_db)):
     }
 
 
+@app.get("/api/conferences/{conf_id}/pc")
+def conference_pc(conf_id: int, db: Session = Depends(get_db)):
+    """Full PC member list for one conference row."""
+    c = db.query(Conference).filter_by(id=conf_id).one_or_none()
+    if c is None:
+        raise HTTPException(status_code=404, detail="conference not found")
+    # Look up PC on round=1 (we don't store per-round PCs).
+    canonical_id = c.id
+    if c.round != 1:
+        canonical = db.query(Conference).filter_by(acronym=c.acronym, year=c.year, round=1).one_or_none()
+        if canonical is not None:
+            canonical_id = canonical.id
+    members = (
+        db.query(PCMember)
+        .filter_by(conference_id=canonical_id)
+        .order_by(PCMember.role, PCMember.name)
+        .all()
+    )
+    return {
+        "acronym": c.acronym,
+        "year": c.year,
+        "pc_url": c.pc_url,
+        "members_total": len(members),
+        "members": [
+            {"name": m.name, "normalized_name": m.normalized_name,
+             "affiliation": m.affiliation, "role": m.role}
+            for m in members
+        ],
+    }
+
+
+class ComparePCIn(BaseModel):
+    # Cap at 20 to keep the response bounded and prevent DoS via huge lists.
+    conference_ids: list[int] = Field(..., min_length=2, max_length=20)
+
+    @field_validator("conference_ids")
+    @classmethod
+    def _dedup(cls, v: list[int]) -> list[int]:
+        # Preserve order, drop duplicates.
+        seen: set[int] = set()
+        out: list[int] = []
+        for cid in v:
+            if cid in seen:
+                continue
+            seen.add(cid)
+            out.append(cid)
+        if len(out) < 2:
+            raise ValueError("Provide at least 2 distinct conference_ids.")
+        return out
+
+
+@app.post("/api/pc/compare")
+def compare_pc(body: ComparePCIn, db: Session = Depends(get_db)):
+    """Intersection-style comparison across N conferences.
+
+    Returns:
+      - venues:        per-venue metadata + PC size
+      - intersection:  list of normalized_names present in ALL selected venues,
+                       with per-venue (name as written, affiliation, role) tuples
+      - pairwise:      {[id_a, id_b]: count} overlap counts for each pair
+    """
+    confs = db.query(Conference).filter(Conference.id.in_(body.conference_ids)).all()
+    if len(confs) != len(set(body.conference_ids)):
+        raise HTTPException(status_code=404, detail="Some conference_ids were not found.")
+
+    venue_meta: dict[int, dict] = {}
+    members_by_venue: dict[int, dict[str, PCMember]] = {}
+    for c in confs:
+        canonical_id = c.id
+        if c.round != 1:
+            canonical = db.query(Conference).filter_by(acronym=c.acronym, year=c.year, round=1).one_or_none()
+            if canonical is not None:
+                canonical_id = canonical.id
+        members = db.query(PCMember).filter_by(conference_id=canonical_id).all()
+        members_by_venue[c.id] = {m.normalized_name: m for m in members}
+        venue_meta[c.id] = {
+            "id": c.id, "acronym": c.acronym, "year": c.year,
+            "round": c.round, "rounds_total": c.rounds_total,
+            "pc_url": c.pc_url, "pc_size": len(members),
+        }
+
+    # Intersection of normalized names across ALL selected venues.
+    name_sets = [set(d.keys()) for d in members_by_venue.values()]
+    common = set.intersection(*name_sets) if name_sets and all(name_sets) else set()
+
+    intersection = []
+    for norm in sorted(common):
+        # Use the longest written-name across venues as the display name.
+        names = [members_by_venue[cid][norm].name for cid in body.conference_ids]
+        display = max(names, key=len)
+        per_venue = {}
+        for cid in body.conference_ids:
+            m = members_by_venue[cid][norm]
+            per_venue[str(cid)] = {
+                "name": m.name, "affiliation": m.affiliation, "role": m.role,
+            }
+        intersection.append({
+            "normalized_name": norm,
+            "name": display,
+            "per_venue": per_venue,
+        })
+
+    # Pairwise overlap counts — useful when comparing 3+ venues.
+    pairwise = []
+    ids = list(body.conference_ids)
+    for i, a in enumerate(ids):
+        for b in ids[i + 1:]:
+            overlap = members_by_venue[a].keys() & members_by_venue[b].keys()
+            pairwise.append({"a": a, "b": b, "count": len(overlap)})
+
+    return {
+        "venues": [venue_meta[i] for i in body.conference_ids],
+        "intersection_size": len(intersection),
+        "intersection": intersection,
+        "pairwise": pairwise,
+    }
+
+
 @app.get("/api/areas")
 def list_areas(db: Session = Depends(get_db)):
     out: set[str] = set()
@@ -228,15 +426,31 @@ def calendar_feed(
     return Response(content=build_ics(rows), media_type="text/calendar; charset=utf-8")
 
 
+_AREA_VOCAB = {"control", "networking", "ml", "systems", "multimedia", "robotics"}
+
+
 class AddVenueIn(BaseModel):
-    url: str
-    area_hints: list[str] | None = None
+    url: str = Field(..., min_length=8, max_length=2048)
+    area_hints: list[str] | None = Field(default=None, max_length=10)
+
+    @field_validator("area_hints")
+    @classmethod
+    def _filter_areas(cls, v):
+        if not v:
+            return v
+        return [a for a in v if isinstance(a, str) and a.lower() in _AREA_VOCAB]
 
 
 @app.post("/api/venues")
-def add_venue(body: AddVenueIn):
-    """Extract a venue's metadata from a CFP URL via two-pass LLM and persist it."""
-    extracted = llm_extract.extract_full_venue(body.url, body.area_hints or [])
+def add_venue(body: AddVenueIn, request: Request):
+    """Extract a venue's metadata from a CFP URL via two-pass LLM and persist it.
+
+    Rate-limited per client IP (5/hour) and URL-validated to prevent token-burn
+    abuse on the public Render deployment.
+    """
+    _enforce_add_venue_rate_limit(request)
+    url = _validate_cfp_url(body.url)
+    extracted = llm_extract.extract_full_venue(url, body.area_hints or [])
     if extracted is None:
         raise HTTPException(
             status_code=502,

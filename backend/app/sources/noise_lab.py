@@ -43,12 +43,9 @@ def _strip_tags(s: str) -> str:
 
 
 def ingest_all() -> dict[str, int]:
-    try:
-        r = httpx.get(URL, timeout=30.0, follow_redirects=True,
-                      headers={"User-Agent": "conference-finder/0.1"})
-        r.raise_for_status()
-    except httpx.HTTPError as e:
-        return {"error": str(e), "added": 0, "recorded": 0}
+    r = _common.http_get(URL)
+    if r is None:
+        return {"error": "fetch failed", "added": 0, "recorded": 0}
     html = r.text
 
     # noise-lab dedicates a separate conf-block per (venue, year, round). Key

@@ -16,12 +16,12 @@ SOURCE_NAME = "ds-deadlines"
 
 
 def ingest_all() -> dict[str, int]:
-    try:
-        r = httpx.get(URL, timeout=30.0)
-        r.raise_for_status()
-    except httpx.HTTPError as e:
-        return {"error": str(e), "added": 0, "recorded": 0}
-    entries = yaml.safe_load(r.text) or []
+    r = _common.http_get(URL)
+    if r is None:
+        return {"error": "fetch failed", "added": 0, "recorded": 0}
+    entries = _common.safe_yaml_load_text(r.text, []) or []
+    if not isinstance(entries, list):
+        return {"error": "unexpected YAML shape", "added": 0, "recorded": 0}
     added = 0
     recorded = 0
     with SessionLocal() as db:

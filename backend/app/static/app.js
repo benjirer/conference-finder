@@ -10,7 +10,9 @@ const state = {
   q: "",
   sortKey: "submission_deadline",
   sortDir: "asc",
-  anchor: null,   // {lat, lng} when user has picked a point on the world map
+  anchor: null,           // {lat, lng} when user has picked a point on the world map
+  compareIds: new Set(),  // conference row IDs ticked for PC comparison
+  compareMode: false,     // when true, the checkbox column is visible
 };
 
 function haversineKm(a, b) {
@@ -199,9 +201,57 @@ function setupSortableHeaders() {
   });
 }
 
+// ───────────────────────────── PC compare selection ─────────────────────────────
+function updateCompareUI() {
+  document.body.classList.toggle("compare-mode", state.compareMode);
+  const btn = $("#compare-btn");
+  const label = $("#compare-btn-label");
+  const exit = $("#compare-exit");
+  const n = state.compareIds.size;
+
+  if (!state.compareMode) {
+    label.textContent = "Compare PCs";
+    btn.disabled = false;
+    btn.classList.remove("compare-active");
+    btn.title = "Enter PC-comparison mode";
+    exit.style.display = "none";
+  } else {
+    btn.classList.add("compare-active");
+    exit.style.display = "";
+    if (n < 2) {
+      label.textContent = n === 0 ? "Pick venues to compare" : "Pick one more venue";
+      btn.disabled = true;
+      btn.title = "Tick at least 2 venues with PC data";
+    } else {
+      label.textContent = `Compare (${n}) →`;
+      btn.disabled = false;
+      btn.title = "Open comparison";
+    }
+  }
+
+  document.querySelectorAll("tbody tr[data-id]").forEach((tr) => {
+    const id = Number(tr.dataset.id);
+    tr.classList.toggle("compare-selected", state.compareIds.has(id));
+    const cb = tr.querySelector("input.compare-checkbox");
+    if (cb) cb.checked = state.compareIds.has(id);
+  });
+}
+
 // ───────────────────────────── rendering ─────────────────────────────
 function renderRow(c) {
   const tr = document.createElement("tr");
+  tr.dataset.id = c.id;
+  if (state.compareIds.has(c.id)) tr.classList.add("compare-selected");
+
+  const hasPC = (c.pc_members_count || 0) > 0;
+  const compareCell = `<td class="compare-cell compare-col">${
+    hasPC
+      ? `<input type="checkbox" class="compare-checkbox" data-id="${c.id}"
+              ${state.compareIds.has(c.id) ? "checked" : ""}
+              title="${c.pc_members_count} PC members — tick to compare"
+              aria-label="Add ${escapeHtml(c.acronym)} ${c.year} to PC comparison" />`
+      : `<span class="no-pc" title="No PC data extracted yet for this venue. Run python -m app.enrich_pc --acronym ${escapeHtml(c.acronym)} to populate.">—</span>`
+  }</td>`;
 
   const roundLabel = (c.round && c.round > 1) || (c.rounds_total && c.rounds_total > 1)
     ? `<span class="round-flag" title="${c.rounds_total ? `Round ${c.round} of ${c.rounds_total}` : `Round ${c.round}`}">R${c.round}${c.rounds_total ? `/${c.rounds_total}` : ""}</span>`
@@ -244,6 +294,7 @@ function renderRow(c) {
   const accept = c.acceptance_rate != null ? `${Math.round(c.acceptance_rate * 100)}%` : "—";
 
   tr.innerHTML = `
+    ${compareCell}
     ${venueCell}
     ${locationCell}
     ${areasCell}
@@ -254,7 +305,7 @@ function renderRow(c) {
     <td class="deadline${c.predicted ? " predicted" : ""}">${conf}</td>
     <td>${c.page_limit ?? "—"}</td>
     <td>${accept}</td>
-    <td class="muted" style="font-size:12px;">
+    <td class="muted source-cell" style="font-size:12px;" title="${escapeHtml(c.source)}${c.last_verified ? " — verified " + fmt(c.last_verified) : ""}">
       ${escapeHtml(c.source)}
       ${c.last_verified ? `<div style="font-size:11px;">${fmt(c.last_verified)}</div>` : ""}
     </td>`;
@@ -266,6 +317,7 @@ function renderRows(data) {
   tbody.innerHTML = "";
   const sorted = sortRows(data);
   for (const c of sorted) tbody.appendChild(renderRow(c));
+  updateCompareUI();
 }
 
 async function load() {
@@ -339,6 +391,112 @@ function setupAddModal() {
       status.textContent = "Error: " + e.message;
     }
   };
+}
+
+function setupCompareModal() {
+  const modal = $("#pc-modal");
+  $("#pc-close").onclick = () => (modal.style.display = "none");
+  modal.onclick = (e) => { if (e.target === modal) modal.style.display = "none"; };
+  $("#pc-clear").onclick = () => {
+    state.compareIds.clear();
+    updateCompareUI();
+    modal.style.display = "none";
+  };
+
+  // Delegate checkbox toggles from any rendered row.
+  document.addEventListener("change", (e) => {
+    const cb = e.target.closest && e.target.closest("input.compare-checkbox");
+    if (!cb) return;
+    const id = Number(cb.dataset.id);
+    if (cb.checked) state.compareIds.add(id);
+    else state.compareIds.delete(id);
+    updateCompareUI();
+  });
+
+  // Header button: 1st click enters compare mode; subsequent click with ≥2
+  // selected opens the comparison modal. The X button exits & clears.
+  $("#compare-btn").onclick = async () => {
+    if (!state.compareMode) {
+      state.compareMode = true;
+      updateCompareUI();
+      return;
+    }
+    if (state.compareIds.size < 2) return;
+    $("#pc-title").textContent = "PC comparison";
+    $("#pc-summary").textContent = "Loading…";
+    $("#pc-pairwise").innerHTML = "";
+    $("#pc-table-wrap").innerHTML = "";
+    modal.style.display = "";
+    try {
+      const r = await fetch("/api/pc/compare", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ conference_ids: [...state.compareIds] }),
+      });
+      const body = await r.json();
+      if (!r.ok) {
+        $("#pc-summary").textContent = "Error: " + (body.detail || r.statusText);
+        return;
+      }
+      renderCompareResult(body);
+    } catch (err) {
+      $("#pc-summary").textContent = "Error: " + err.message;
+    }
+  };
+
+  $("#compare-exit").onclick = () => {
+    state.compareMode = false;
+    state.compareIds.clear();
+    updateCompareUI();
+  };
+}
+
+function renderCompareResult(body) {
+  const venues = body.venues || [];
+  const labels = venues.map((v) =>
+    `${v.acronym} ${v.year}${v.round && v.round > 1 ? " R" + v.round : ""}`
+  );
+  $("#pc-title").textContent = `PC comparison — ${labels.join(" ∩ ")}`;
+
+  const sizes = venues.map((v) => `${v.acronym}: ${v.pc_size}`).join(" · ");
+  const missing = venues.filter((v) => v.pc_size === 0);
+  let summary = `${sizes}. Intersection size: ${body.intersection_size}.`;
+  if (missing.length) {
+    summary += `  ⚠ No PC data for: ${missing.map(v=>v.acronym).join(", ")}. Run python -m app.enrich_pc --acronym <X> locally to extract.`;
+  }
+  $("#pc-summary").textContent = summary;
+
+  // Pairwise overlap cards (useful when N > 2).
+  if (venues.length > 2 && body.pairwise) {
+    const idToLabel = Object.fromEntries(venues.map((v, i) => [v.id, labels[i]]));
+    const cards = body.pairwise.map((p) =>
+      `<div class="pc-pair">${escapeHtml(idToLabel[p.a])} ∩ ${escapeHtml(idToLabel[p.b])}: <span class="count">${p.count}</span></div>`
+    ).join("");
+    $("#pc-pairwise").innerHTML = `<div class="pc-pair-grid">${cards}</div>`;
+  }
+
+  if (!body.intersection.length) {
+    $("#pc-table-wrap").innerHTML = '<p class="muted">No people appear on all selected PCs.</p>';
+    return;
+  }
+
+  const idToLabel = Object.fromEntries(venues.map((v, i) => [String(v.id), labels[i]]));
+  const venueHeaders = venues.map((v, i) => `<th>${escapeHtml(labels[i])}</th>`).join("");
+  const rows = body.intersection.map((m) => {
+    const cells = venues.map((v) => {
+      const pv = m.per_venue[String(v.id)];
+      if (!pv) return "<td>—</td>";
+      const role = pv.role && pv.role !== "member" ? ` <span class="muted" style="font-size:11px;">(${escapeHtml(pv.role)})</span>` : "";
+      const aff = pv.affiliation ? `<div class="muted" style="font-size:11px;">${escapeHtml(pv.affiliation)}</div>` : "";
+      return `<td>${escapeHtml(pv.name)}${role}${aff}</td>`;
+    }).join("");
+    return `<tr><td><strong>${escapeHtml(m.name)}</strong></td>${cells}</tr>`;
+  }).join("");
+  $("#pc-table-wrap").innerHTML = `
+    <table>
+      <thead><tr><th>Person</th>${venueHeaders}</tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
 }
 
 function setupSourcesModal() {
@@ -557,4 +715,6 @@ setupSortableHeaders();
 renderHeaderSort();
 setupThemeToggle();
 setupMapModal();
+setupCompareModal();
+updateCompareUI();
 load();

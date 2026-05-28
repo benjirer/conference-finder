@@ -72,12 +72,13 @@ def _split_deadline_field(raw: str | None) -> tuple[datetime | None, datetime | 
 
 
 def _fetch(query: str) -> list[dict]:
+    r = _common.http_get(URL.format(q=query), timeout=20.0,
+                         headers={"Content-Type": "application/json"})
+    if r is None:
+        return []
     try:
-        r = httpx.get(URL.format(q=query), timeout=20.0,
-                      headers={"Content-Type": "application/json"})
-        r.raise_for_status()
         data = r.json()
-    except (httpx.HTTPError, ValueError):
+    except ValueError:
         return []
     if not isinstance(data, dict):
         return []
@@ -98,7 +99,7 @@ def ingest_all() -> dict[str, int]:
         for row in db.execute(select(Conference.acronym).distinct()).all():
             queries.add(row[0])
 
-    now = datetime.utcnow()
+    now = _common.utc_now()
     year_min = now.year - 1
     year_max = now.year + 3
 

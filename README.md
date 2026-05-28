@@ -1,67 +1,77 @@
 # Conference Finder
 
-A locally-hosted tracker for conferences and workshops at the intersection of
+A locally-hostable tracker for conferences and workshops at the intersection of
 **control**, **networked systems**, and **machine learning**. Provides a web
-dashboard with filterable deadlines and a subscribable iCalendar feed.
+dashboard with filterable deadlines, a subscribable iCalendar feed, an
+interactive world map for "what's near here?", and PC-membership comparison
+across venues.
 
-## What's in it now
+Single-binary backend (FastAPI + SQLite), no Node/npm. Designed to run free on
+[Render](https://render.com) — see [Deploying](#deploying-for-free-on-render).
 
-After a fresh refresh: ~480 distinct conference/workshop venues across 6
-aggregators + curated seed + user-added, plus ~230 next-year predictions.
+## What's in the dashboard
 
-Aggregators (in priority order — later ones win when sources disagree):
-
-| Source | Coverage | Format |
-|---|---|---|
-| [ccfddl](https://github.com/ccfddl/ccf-deadlines) | Broad CS (SIGCOMM, NSDI, NeurIPS, ICML, ICRA, …) | YAML in GitHub repo |
-| [aideadlines](https://github.com/abhshkdz/ai-deadlines) | AI / CV / NLP (CVPR, ECCV, ACL, EMNLP, …) | YAML in GitHub repo |
-| [ds-deadlines](https://github.com/ds-deadlines/ds-deadlines.github.io) | Distributed systems / blockchain / SE | YAML in GitHub repo |
-| [klb2/conference-calendar](https://github.com/klb2/conference-calendar) | IEEE Comms / Signal Processing / Vehicular Tech | Per-society YAML |
-| [noise-lab](https://noise-lab.net/networking-deadlines/) | Networking deadlines (small set) | HTML scrape |
-| [confsearch.ethz.ch](https://confsearch.ethz.ch) | Broad conference search | JSON API (per-acronym query) |
-
-Each aggregator also writes a per-source row to the `source_records` table.
-A reconciliation step compares every venue's `submission_deadline` across all
-sources and flags any (acronym, year) where two aggregators disagree by more
-than one day. Click the red "verify" chip in the UI to see the per-source
-breakdown.
-
-Curated layers:
-
-- `backend/data/seed_venues.yaml` — hand-curated CDC, ACC, ECC, L4DC, HSCC,
-  SOSP, OSDI, plus workshops (PACMI/HotOS @ SOSP, ML-for-Systems @ NeurIPS,
-  HotNets/NetAI @ SIGCOMM). Overwrites aggregator data.
-- `backend/data/venue_stats.yaml` — per-acronym h5-index, acceptance rate,
-  page limit. Applied to every row regardless of source.
-- `backend/data/user_added.yaml` — venues added via the **+ Add venue** button.
+- **~480 venues across 6 aggregators** automatically pulled (no manual upkeep):
+  ccfddl, aideadlines, ds-deadlines, klb2/conference-calendar, noise-lab,
+  confsearch.ethz.ch. ~200 LLM-enriched with full date fields, page limits,
+  acceptance rates, multi-round info. ~145 with extracted PC member lists.
+- **Light & dark theme** with theme-following CartoDB tiles for the map.
+- **Filters**: areas (control / networking / ml / systems / multimedia / robotics),
+  workshops, deadline state (upcoming / passed / all), predicted, diverged
+  (sources disagree), year, free-text search.
+- **Sortable columns**: every column. Date columns sort chronologically, tier
+  by rank order, acceptance rate numerically.
+- **World map** (🌍 button): click anywhere to set an anchor; venues re-sort
+  by haversine distance.
+- **PC compare**: enter compare mode → tick venues that have PC data → see
+  intersection + per-venue affiliations + pairwise overlap counts.
+- **Calendar subscription** with per-deadline all-day **and** 1-hour timed
+  events, both UTC-anchored. Predicted dates marked `[Predicted]`.
+- **`+ Add venue`** button: paste a CFP URL → two-pass LLM extraction → result
+  persisted (rate-limited per IP).
 
 ## Architecture
 
 ```
-6 aggregators (in priority order, low → high):
-  confsearch → noise-lab → klb2 → ds-deadlines → aideadlines → ccfddl
-                          │
-                          ├──► conferences table (canonical merged view)
-                          └──► source_records table (per-source raw values)
-
-seed_venues.yaml    ──► conferences (overwrites)
-user_added.yaml     ──► conferences (overwrites)
-LLM enrichment      ──► conferences (two-pass agreement)
-reconcile           ──► sets `diverged=true` when source_records disagree
-predict             ──► synthesizes next-year rows
-
-           ▼
-      SQLite ──► FastAPI ──► dashboard (static HTML/JS) + /calendar.ics
+┌──────── refresh pipeline (17 steps, idempotent, no API calls) ────────┐
+│                                                                       │
+│  1. confsearch                                                        │
+│  2. noise-lab                                                         │
+│  3. klb2                       ← aggregator ingest (lowest priority)  │
+│  4. ds-deadlines                                                      │
+│  5. aideadlines                                                       │
+│  6. ccfddl                     ← aggregator ingest (highest priority) │
+│  7. seed_venues.yaml           ← curated control venues + workshops   │
+│  8. user_added.yaml            ← venues added via /api/venues         │
+│  9. cleanup old years                                                 │
+│ 10. venue_stats.yaml overlay   ← h5_index / accept rate / page limit  │
+│ 11. cached_extras.yaml         ← LLM-extracted dates etc (local cache)│
+│ 12. cached_pc.yaml             ← LLM-extracted PC members (local)     │
+│ 13. classify missing areas     ← name-keyword classifier              │
+│ 14. geocode locations          ← static city dict                     │
+│ 15. reconcile                  ← cross-source date verification       │
+│ 16. predict next-year          ← extrapolate one year forward         │
+│ 17. predict missing tiers      ← h5_index heuristic                   │
+│                                                                       │
+└───────────────────────────────────────────────────────────────────────┘
+                              ▼
+                         SQLite DB
+                              ▼
+                ┌──────────────────────────┐
+                │  FastAPI + static HTML   │  ←  Leaflet world map,
+                │  dashboard + calendar    │     theme toggle, PC compare,
+                │  + ICS feed              │     filters, sort, /api/*
+                └──────────────────────────┘
 ```
 
-Two-pass LLM extraction: each seed/user-added venue's `cfp_url` is sent to
-Claude twice with different prompts. A field only updates the DB if both
-extractions produce the same value.
+**Two side-cars for one-shot LLM enrichment** (run *locally*, commit their YAML
+caches so Render never has to make API calls):
 
-Cross-source verification: the reconcile step compares each source's
-`submission_deadline` for every (acronym, year). If any two disagree by more
-than one day, `diverged=true` is set. Click the red "verify" chip in the UI
-to open a modal showing every source's recorded values side-by-side.
+- `python -m app.enrich_extras` — fills missing date fields, page limits,
+  multi-round info from each venue's CFP page (~$2 for a full pass).
+- `python -m app.enrich_pc` — discovers each venue's PC page and extracts the
+  member list (~$3 for a full pass).
+- `python -m app.enrich` — runs both, then refreshes the DB in one command.
 
 ## Setup
 
@@ -70,119 +80,105 @@ cd backend
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
+python -m app.refresh                # initial data load (~60 s)
+uvicorn app.main:app --port 8000     # serve at http://localhost:8000
+```
 
-# Optional but recommended — enables LLM auto-extraction of seed venues:
+That's the full daily workflow. No API key required for any of the public-data
+features.
+
+### Optional: enrich with LLM data
+
+For richer PC compare / notification / camera-ready / page-limit fields:
+
+```bash
 export ANTHROPIC_API_KEY=sk-ant-...
-
-# Initial data load:
-python -m app.refresh
-
-# Run the server:
-uvicorn app.main:app --port 8000
+python -m app.enrich                 # one command: extras + pc + refresh
 ```
 
-Open http://localhost:8000.
+Run once, then commit `backend/data/cached_extras.yaml` and `cached_pc.yaml`.
+Re-run monthly (or with `--force --acronym X` for a single venue). The
+local-only design keeps Render's Anthropic spend at $0.
 
-No Node, no npm. The frontend is plain HTML/CSS/JS served from
-`backend/app/static/` by the same FastAPI process.
+### Tests
 
-## Daily refresh
-
-Add a launchd job (macOS) or cron entry:
-
-```cron
-0 4 * * *  cd /path/to/conference-finder/backend && /path/to/.venv/bin/python -m app.refresh >> refresh.log 2>&1
+```bash
+python -m pytest tests/ -q
 ```
 
-The refresh:
-
-1. Pulls latest ccfddl YAMLs and upserts the most recent two years per venue.
-2. Re-applies `seed_venues.yaml` and `venue_stats.yaml`.
-3. (If `ANTHROPIC_API_KEY` is set) re-extracts dates for seed venues with a `cfp_url`.
-
-## Calendar subscription
-
-Click **Subscribe to calendar** in the UI — the modal gives a filter-aware ICS
-URL. Or hit `http://localhost:8000/calendar.ics` directly. Each row in the DB
-emits up to five events: abstract / paper / notification / camera-ready
-deadlines (each a 30-min block at the local deadline time, normalised to UTC)
-and an all-day block for the conference itself.
-
-- **Apple Calendar**: File → New Calendar Subscription → paste URL.
-- **Google Calendar**: Other calendars → From URL → paste URL.
-  (Google refreshes external feeds every 8–24 h.)
-- **Outlook**: Add calendar → Subscribe from web.
-
-## Adding / editing venues
-
-1. **Venue already in ccfddl?** Add a one-line entry to
-   `backend/app/sources/ccfddl.py:VENUE_MAP` with the right `areas` and `tier`.
-2. **Venue not in ccfddl?** Add a block to `backend/data/seed_venues.yaml`.
-   Leave dates `null` and set `cfp_url` — the LLM extractor will fill them in
-   on the next refresh (with two-pass verification).
-3. Re-run `python -m app.refresh`.
-
-The seed file has an entry for **PACMI @ SOSP** with `cfp_url: null` as a
-placeholder; once you confirm the workshop name/URL, edit it and re-refresh.
-
-## Reliability notes
-
-Every row carries `source` (`ccfddl` / `seed` / `llm_extract`) and
-`last_verified` timestamp, both visible in the UI's rightmost column. A red
-"verify" chip means the two-pass LLM extraction disagreed — those rows are
-worth double-checking against the official CFP.
-
-`venue_stats.yaml` is point-in-time. Refresh annually from
-[Google Scholar Metrics](https://scholar.google.com/citations?view_op=top_venues)
-and conference websites.
+35 smoke tests covering helpers, API endpoints, refresh pipeline, rate-limit
+guard, enrichment cache.
 
 ## Deploying for free on Render
 
-`render.yaml` at the repo root is a Render Blueprint — Render will read it and
-spin up the service automatically. Free tier ($0/month, no credit card).
+`render.yaml` at the repo root is a Render Blueprint. Free tier, no credit card.
 
-Steps:
+1. Push to GitHub.
+2. <https://dashboard.render.com> → **New → Blueprint** → pick the repo.
+3. (Optional) in the service's **Environment** tab, set
+   `ANTHROPIC_API_KEY` if you want the **+ Add venue** button to work in
+   production. Without it, that button degrades gracefully; everything else
+   keeps working.
 
-1. **Initialise git and push to GitHub** (Render needs a Git remote):
+Render auto-deploys on every push. The free tier sleeps after 15 min idle
+(~60 s cold-start to rebuild the DB from sources + committed caches).
 
-   ```bash
-   cd /path/to/conference-finder
-   git init -b main
-   git add .
-   git commit -m "Initial commit"
-   # Create an empty repo on github.com, then:
-   git remote add origin git@github.com:YOURUSER/conference-finder.git
-   git push -u origin main
-   ```
+### What does and doesn't cost tokens
 
-2. **Sign up at <https://dashboard.render.com>** (GitHub login works, no card required).
+| Action | Cost | When |
+|---|---|---|
+| Render cold start | $0 | automatic |
+| Daily refreshes / users browsing | $0 | automatic |
+| `+ Add venue` button | ~$0.01 | only when someone clicks |
+| `python -m app.enrich` (local) | ~$3–5 full pass | only when you run it |
 
-3. **New → Blueprint → connect the repo**. Render reads `render.yaml`,
-   builds the Python service, and gives you a URL like
-   `https://conference-finder.onrender.com`.
+## Hardening notes (deployed-ready)
 
-4. **(Optional)** in the Render dashboard, add `ANTHROPIC_API_KEY` as an
-   environment variable on the service. Without it, the **+ Add venue**
-   button and LLM-extract step gracefully degrade (other 6 sources still work).
+- **YAML loaders** never raise — corrupt cache files log a warning and the
+  pipeline continues with defaults.
+- **HTTP fetches** use a shared retry helper (`_common.http_get`) that retries
+  5xx and connection failures, gives up immediately on 4xx.
+- **`POST /api/venues`** is rate-limited at 5/hour per client IP, validates
+  URL scheme (http/https only), max length 2048, and blocks SSRF targets
+  (localhost / private IPs / `.local`).
+- **`POST /api/pc/compare`** caps `conference_ids` at 20.
+- **Schema migration** in `db.py` only drops tables when
+  `CONFERENCE_FINDER_NO_DESTRUCTIVE=1` is *not* set (default: allowed,
+  since the DB is reproducible).
 
-### What to expect
+## Adding venues
 
-- **Cold start ~60 s.** Free instances sleep after 15 min idle; the next
-  request wakes the container, which runs `python -m app.refresh` before
-  uvicorn binds. The refresh rebuilds the entire DB from public sources, so
-  data is always current — at the cost of that first-request latency.
-- **Ephemeral disk.** Anything you add via the **+ Add venue** button (which
-  writes `user_added.yaml`) is wiped on every restart. If you want
-  persistence, swap SQLite for a Supabase free Postgres tier and persist
-  `user_added.yaml` in an object store — out of scope here.
-- **Daily refresh:** the cold-start refresh means data is rebuilt every time
-  someone visits after a sleep, so you don't need a separate cron job.
+1. **Already in ccfddl?** Add a one-line entry to
+   `app/sources/ccfddl.py::VENUE_MAP` with the right `areas` and `tier`.
+2. **Not in any aggregator?** Add a block to `backend/data/seed_venues.yaml`
+   (or click **+ Add venue** in the dashboard — both write to the same DB).
+3. Re-run `python -m app.refresh`.
 
-## Migrating to paid hosting later
+## File layout
 
-The backend is stateless FastAPI over SQLite. Drop it behind any reverse proxy
-(Caddy / nginx). For multi-user hosting with persistence:
-
-- Swap SQLite → Postgres by editing `db.py`.
-- Add an auth layer in `main.py` (FastAPI has built-in `Depends`-based auth).
-- Containerize: `python:3.12-slim` + `COPY backend/ /app` + `CMD ["uvicorn", ...]`.
+```
+backend/
+  app/
+    main.py                ← FastAPI app + endpoints
+    refresh.py             ← the 17-step pipeline
+    enrich.py              ← single-command LLM enrichment
+    enrich_extras.py       ← LLM-extract dates etc
+    enrich_pc.py           ← LLM-extract PC members
+    _enrich_common.py      ← shared cache class
+    models.py              ← SQLAlchemy models
+    db.py                  ← engine + migrations
+    ical.py                ← calendar feed generator
+    sources/               ← 18 ingest/processing modules (one per aggregator)
+    static/                ← dashboard HTML / CSS / JS (vanilla, no build step)
+  data/
+    seed_venues.yaml       ← curated venues (commit changes)
+    venue_stats.yaml       ← per-acronym h5/accept/page (commit changes)
+    cached_extras.yaml     ← LLM cache for dates (commit, auto-generated)
+    cached_pc.yaml         ← LLM cache for PCs   (commit, auto-generated)
+    user_added.yaml        ← venues from + Add (commit if you want them on Render)
+    conferences.db         ← SQLite, regenerated on every refresh (gitignored)
+  tests/                   ← pytest smoke tests
+  requirements.txt
+  pytest.ini
+render.yaml                ← Render Blueprint
+```

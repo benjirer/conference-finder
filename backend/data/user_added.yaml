@@ -13,3 +13,14 @@ venues:
   conference_start: '2026-08-17'
   page_limit: 6
   cfp_url: https://conferences.sigcomm.org/sigcomm/2026/hotoptics/
+- acronym: ATC
+  name: ACM SIGOPS Annual Technical Conference
+  year: 2026
+  is_workshop: false
+  areas:
+  - networking
+  - systems
+  conference_start: '2026-11-15'
+  conference_end: '2026-11-18'
+  location: Shatin, Hong Kong
+  cfp_url: https://sigops.org/s/conferences/atc/2026/index.html

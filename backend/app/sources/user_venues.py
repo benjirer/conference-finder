@@ -14,6 +14,7 @@ from dateutil import parser as dparser
 
 from ..db import SessionLocal
 from ..models import Conference
+from . import _common
 
 DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
 USER_FILE = DATA_DIR / "user_added.yaml"
@@ -27,7 +28,10 @@ _DATE_FIELDS = (
 def _load_yaml() -> dict:
     if not USER_FILE.exists():
         return {"venues": []}
-    raw = yaml.safe_load(USER_FILE.read_text()) or {}
+    from . import _common as _c
+    raw = _c.safe_yaml_load(USER_FILE, {"venues": []})
+    if not isinstance(raw, dict):
+        raw = {"venues": []}
     raw.setdefault("venues", [])
     return raw
 
@@ -62,7 +66,7 @@ def append_and_upsert(venue: dict, source_url: str, diverged_fields: list[str]) 
     _save_yaml(raw)
 
     from . import _common as _c
-    now = datetime.utcnow()
+    now = _common.utc_now()
     canon = _c.canonical_acronym(venue.get("acronym"))
     with SessionLocal() as db:
         row = (
@@ -112,7 +116,7 @@ def append_and_upsert(venue: dict, source_url: str, diverged_fields: list[str]) 
 def ingest_user_added() -> dict[str, int]:
     raw = _load_yaml()
     upserted = 0
-    now = datetime.utcnow()
+    now = _common.utc_now()
     with SessionLocal() as db:
         from . import _common as _c
         for v in raw.get("venues", []):

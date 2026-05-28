@@ -30,7 +30,7 @@
         <h1>Conference Finder</h1>
         <div class="subtitle" id="subtitle">Control · Networking · ML · Systems</div>
       </div>
-      <div style="display:flex; gap:8px; align-items:center;">
+      <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
         <button class="icon-btn" id="map-btn" title="Where do you want to go?" aria-label="Open world map">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -40,8 +40,19 @@
           </svg>
         </button>
         <button class="icon-btn" id="theme-btn" title="Toggle light/dark mode" aria-label="Toggle theme"></button>
+        <button class="subscribe-secondary" id="compare-btn"
+                title="Enter PC-comparison mode">
+          <span id="compare-btn-label">Compare PCs</span>
+        </button>
+        <button class="icon-btn" id="compare-exit" style="display:none;"
+                title="Exit comparison mode" aria-label="Exit comparison mode">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M18 6 6 18M6 6l12 12"/>
+          </svg>
+        </button>
         <button class="subscribe-secondary" id="add-btn">+ Add venue</button>
-        <button class="subscribe" id="subscribe-btn">Subscribe to calendar</button>
+        <button class="subscribe-secondary" id="subscribe-btn">Subscribe to calendar</button>
       </div>
     </header>
 
@@ -98,6 +109,7 @@
       <table id="conf-table" style="display:none;">
         <thead>
           <tr>
+            <th class="compare-col" title="Tick venues to compare their PCs"></th>
             <th data-sort="venue">Venue</th>
             <th data-sort="location">Location</th>
             <th data-sort="areas">Areas</th>
@@ -155,6 +167,20 @@
         <span id="map-status" class="muted" style="font-size:12px;"></span>
         <span style="flex:1;"></span>
         <button class="close" id="map-close">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PC compare modal -->
+  <div class="modal-backdrop" id="pc-modal" style="display:none;">
+    <div class="modal" style="max-width: 920px;">
+      <h3 style="margin-top:0;" id="pc-title">PC comparison</h3>
+      <p class="muted" id="pc-summary">Loading…</p>
+      <div id="pc-pairwise" style="margin-top:8px;"></div>
+      <div id="pc-table-wrap" style="overflow-x:auto; margin-top:12px;"></div>
+      <div style="display:flex; gap:8px; margin-top:12px;">
+        <button class="close" id="pc-close">Close</button>
+        <button class="close" id="pc-clear">Clear selection</button>
       </div>
     </div>
   </div>

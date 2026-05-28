@@ -77,16 +77,15 @@ def _strip_html(html: str) -> str:
 
 
 def _fetch_page(url: str) -> str | None:
-    try:
-        r = httpx.get(
-            url, timeout=30.0, follow_redirects=True,
-            headers={"User-Agent": "Mozilla/5.0 (compatible; conference-finder/0.2)"},
-        )
-        r.raise_for_status()
-        text = _strip_html(r.text)
-        return text if len(text.strip()) >= 200 else None
-    except (httpx.HTTPError, AttributeError):
+    from . import _common
+    r = _common.http_get(url, timeout=30.0)
+    if r is None:
         return None
+    try:
+        text = _strip_html(r.text)
+    except (AttributeError, ValueError):
+        return None
+    return text if len(text.strip()) >= 200 else None
 
 
 # ────────────────────────────── prompts ──────────────────────────────
@@ -360,6 +359,354 @@ def extract_venue_extras(url: str, acronym: str, year: int) -> dict | None:
 # ────────────────────────────── refresh-time seed enrichment ──────────────
 
 
+# ────────────────────────── PC extraction (used by enrich_pc) ──────────────────
+
+
+_PC_URL_PROMPT = """You're looking at a conference website. The user wants to find the
+Program Committee (PC) page — that's where the names of PC members, area chairs,
+program chairs, and so on are listed.
+
+Look at the page content below and decide:
+
+1. Is the PC information *on this same page*? If yes, set `inline: true` and
+   return the names + roles in `members`.
+2. Or is there a link to a separate PC page? If yes, set `pc_url` to that link.
+
+Return ONLY a JSON object with these keys (null where unknown):
+  pc_url: string or null   — absolute URL to a "Program Committee" / "Committees" /
+                              "Organization" / "Reviewers" page on the same site
+  inline: bool             — true if PC members are listed on the page below
+  members: array or null   — only when inline=true. Each element:
+                              {{ "name": str, "affiliation": str|null, "role": str }}
+                              role ∈ ["member","area-chair","track-chair","program-chair","general-chair"]
+
+Page URL: {url}
+
+Page content (truncated):
+---
+{page}
+---
+
+Return JSON only.
+"""
+
+_PC_EXTRACT_PROMPT = """Extract every Program Committee member listed on this page.
+
+For each person return:
+  name         — full name as written, preserve original capitalisation & accents
+  affiliation  — organisation/institution if shown (null otherwise)
+  role         — one of: "member" (default), "area-chair", "track-chair",
+                  "program-chair", "general-chair"
+
+Be exhaustive — large conferences often list 100–400 members. If you see a
+heading like "Area Chairs", apply role="area-chair" to the names that follow.
+For "PC Members" / "Reviewers" / "Program Committee", use role="member".
+
+Return ONLY a JSON object: {{ "members": [ {{...}} ] }}
+
+Page content:
+---
+{page}
+---
+
+Return JSON only.
+"""
+
+
+def _extract_links(html: str, base_url: str) -> list[tuple[str, str]]:
+    """Pull (text, href) for every <a> tag — text used for scoring."""
+    from urllib.parse import urljoin
+    tree = HTMLParser(html)
+    out = []
+    for a in tree.css("a"):
+        href = a.attributes.get("href")
+        if not href or href.startswith(("mailto:", "javascript:")):
+            continue
+        text = (a.text() or "").strip()
+        # Skip pure fragment-only anchors with no text (decorative).
+        if not text and href.startswith("#"):
+            continue
+        out.append((text[:120], urljoin(base_url, href)))
+    return out
+
+
+def _score_pc_link(text: str, href: str) -> int:
+    """Higher = more likely to be the real PC page.
+
+    Designed to *prefer* dedicated PC pages over the most common impostors:
+    Shadow PC, Ethics committee, Organizing committee, General Chair page,
+    Steering committee. Those all contain "committee" in their text but are
+    different things from what we want.
+    """
+    blob = (text + " " + href).lower()
+    score = 0
+    # Strong positives — actual PC pages.
+    if "program committee" in blob: score += 10
+    if "technical program committee" in blob: score += 12
+    if "tpc" in blob: score += 6
+    if "/program-committee" in href or "/program_committee" in href: score += 10
+    if "/tpc" in href or href.endswith("/pc.html") or "/pc/" in href: score += 8
+    if "reviewers" in blob and "ethics" not in blob: score += 5
+    # Weaker positives — pages that might contain the PC.
+    if "committees" in blob: score += 4
+    if "organization" in blob: score += 2
+    if "people" in blob and "committee" not in blob: score += 1
+    # Negatives — known-wrong pages with overlapping vocabulary.
+    if "shadow" in blob: score -= 12
+    if "ethics" in blob: score -= 12
+    if "organizing committee" in blob or "organising committee" in blob: score -= 5
+    if "general chair" in blob and "program" not in blob: score -= 3
+    if "steering committee" in blob: score -= 8
+    if "advisory" in blob: score -= 5
+    if "past committees" in blob or "previous committee" in blob: score -= 6
+    # Slight penalty for fragment-only URLs (anchor on the same page rather
+    # than a dedicated PC page).
+    if "#" in href and not href.endswith(("/", ".html", ".htm")):
+        score -= 2
+    return score
+
+
+def _derive_homepage_urls(cfp_url: str, website: str | None) -> list[str]:
+    """Best-effort 'where is the homepage?' — the CFP page itself often doesn't
+    link to the PC; the conference homepage usually does (in its nav menu)."""
+    from urllib.parse import urlparse
+    cfp_url = _strip_fragment(cfp_url)  # SPAs put route in fragment; ignore it
+    website = _strip_fragment(website) if website else website
+    urls: list[str] = []
+    if website and website.rstrip("/") != cfp_url.rstrip("/"):
+        urls.append(website)
+    p = urlparse(cfp_url)
+    parts = p.path.rstrip("/").split("/")
+    # Drop a trailing filename (cfp.html, CallForPapers, etc.).
+    if parts and ("." in parts[-1] or parts[-1] in {
+        "CallForPapers", "callforpapers", "cfp", "call-for-papers",
+        "calls", "main-conference", "papers",
+    }):
+        parts = parts[:-1]
+    # And one more level up — many sites place CFP under /cfp/ or /papers/.
+    while parts and parts[-1] in {"cfp", "papers", "calls", "submission", "submissions"}:
+        parts = parts[:-1]
+    candidate = f"{p.scheme}://{p.netloc}" + ("/".join(parts) + "/" if parts else "/")
+    if candidate.rstrip("/") != cfp_url.rstrip("/") and candidate not in urls:
+        urls.append(candidate)
+    return urls
+
+
+_COMMON_PC_PATHS = [
+    # Flat path patterns.
+    "tpc/", "tpc.html", "tpc.htm",
+    "program-committee/", "program-committee.html", "program-committee.htm",
+    "program_committee/", "program_committee.html",
+    "programcommittee/", "programcommittee.html",
+    "pc/", "pc.html",
+    "committees/", "committees.html",
+    "committee/", "committee.html",
+    "organization/", "organization.html",
+    "organisation/", "organisation.html",
+    "organizers/", "organizers.html",
+    "people/", "people.html",
+    # SPA-partial patterns — Angular / hash-routed sites under
+    # `conferences.sigcomm.org` (CoNEXT, IMC, ICN, …) serve content under
+    # /partials/*.html and the SPA shell just routes via #!/...
+    "partials/pc.html", "partials/program-committee.html",
+    "partials/tpc.html", "partials/committee.html", "partials/committees.html",
+    "partials/organization.html", "partials/organisation.html",
+    # And the same under /views/ which other SPA setups use.
+    "views/pc.html", "views/program-committee.html",
+    "views/tpc.html", "views/committee.html",
+]
+
+
+def _strip_fragment(url: str) -> str:
+    """Strip the hash fragment from a URL. SPA fragments (#!/home) must not
+    become part of the base when building probe URLs."""
+    i = url.find("#")
+    return url[:i] if i >= 0 else url
+
+
+def _looks_like_pc_page(html: str) -> bool:
+    """Cheap heuristic: does the page body actually mention committee-y stuff?
+    Used to filter out soft-404s (server returns 200 + redirect-to-home for
+    unknown paths)."""
+    if not html:
+        return False
+    text = html.lower()
+    # At least one of these terms must appear, and the page should have enough
+    # length to plausibly be a member listing.
+    return len(text) > 1500 and any(
+        kw in text for kw in (
+            "program committee", "technical program", "tpc",
+            "reviewers", "area chair", "pc member", "committee member",
+        )
+    )
+
+
+def _probe_common_paths(base_urls: list[str]) -> str | None:
+    """GET-probe common PC URL patterns under each base URL. Returns the first
+    URL whose body actually looks like a PC page (200 + content check)."""
+    seen: set[str] = set()
+    for base in base_urls:
+        base_norm = _strip_fragment(base).rstrip("/") + "/"
+        for path in _COMMON_PC_PATHS:
+            url = base_norm + path
+            if url in seen:
+                continue
+            seen.add(url)
+            from . import _common
+            # Probes expect lots of 404s — keep retries=0 to avoid waste.
+            r = _common.http_get(url, timeout=10.0, retries=0)
+            if r is None:
+                continue
+            # Guard against soft-404 redirects landing on a base page we already know about.
+            final = str(r.url).rstrip("/")
+            if final in {b.rstrip("/") for b in base_urls}:
+                continue
+            if _looks_like_pc_page(r.text):
+                return str(r.url)
+    return None
+
+
+def _sibling_year_urls(known_pc_urls: list[str], target_year: int) -> list[str]:
+    """Given pc_urls known for sibling years of the same venue, try swapping
+    the year for `target_year` to construct a guess."""
+    import re as _re
+    out: list[str] = []
+    for u in known_pc_urls or []:
+        # Replace any 4-digit year in the URL with the target year.
+        guess = _re.sub(r"\b(20\d{2})\b", str(target_year), u, count=2)
+        if guess != u and guess not in out:
+            out.append(guess)
+    return out
+
+
+def discover_pc_url(
+    cfp_url: str,
+    website: str | None = None,
+    target_year: int | None = None,
+    sibling_pc_urls: list[str] | None = None,
+) -> tuple[str | None, list[dict] | None]:
+    """Returns (pc_url, inline_members). Either may be None.
+
+    Steps:
+      1. Scrape the CFP page + the homepage(s), score every PC-looking anchor,
+         pick the highest scorer.
+      2. If no link scores > 0, probe common URL patterns under the homepage
+         (e.g. /tpc/, /program-committee.html).
+      3. If sibling-year pc_urls are known (e.g. we have SIGCOMM 2026's PC),
+         year-substitute them and probe each.
+      4. Last resort: ask Haiku to find a PC link in the CFP page text.
+    """
+    if not ANTHROPIC_KEY:
+        return None, None
+
+    from . import _common as _c
+
+    def _fetch(url):
+        r = _c.http_get(url, timeout=30.0)
+        return r.text if r is not None else None
+
+    pages: dict[str, str] = {}
+    cfp_html = _fetch(cfp_url)
+    if cfp_html:
+        pages[cfp_url] = cfp_html
+    for hp in _derive_homepage_urls(cfp_url, website):
+        if hp in pages:
+            continue
+        html = _fetch(hp)
+        if html:
+            pages[hp] = html
+
+    if not pages:
+        return None, None
+
+    candidates: dict[str, int] = {}  # url → best score seen
+    for src, html in pages.items():
+        for text, href in _extract_links(html, src):
+            s = _score_pc_link(text, href)
+            if s <= 0:
+                continue
+            # Skip self-references that would loop us back.
+            if href.rstrip("/") in {u.rstrip("/") for u in pages}:
+                continue
+            candidates[href] = max(candidates.get(href, -10**9), s)
+
+    if candidates:
+        best_url, _ = max(candidates.items(), key=lambda kv: kv[1])
+        return best_url, None
+
+    # Fallback 1: probe common PC URL patterns on the homepage(s).
+    base_urls = list(pages.keys())
+    probed = _probe_common_paths(base_urls)
+    if probed:
+        return probed, None
+
+    # Fallback 2: year-substitute known sibling-year pc_urls.
+    if sibling_pc_urls and target_year:
+        sibling_guesses = _sibling_year_urls(sibling_pc_urls, target_year)
+        for guess in sibling_guesses:
+            r = _c.http_get(guess, timeout=10.0, retries=0)
+            if r is not None and _looks_like_pc_page(r.text):
+                return str(r.url), None
+
+    # Last resort: ask Haiku to look at the CFP page text.
+    page = _strip_html(cfp_html or "")
+    if not page:
+        return None, None
+    result = _call_claude(MODEL_FAST, _PC_URL_PROMPT.format(url=cfp_url, page=page))
+    if not result:
+        return None, None
+    if result.get("inline") and isinstance(result.get("members"), list):
+        return None, result["members"]
+    pc_url = result.get("pc_url")
+    return (pc_url if isinstance(pc_url, str) else None), None
+
+
+def extract_pc_members(pc_url: str) -> list[dict] | None:
+    """Fetch a PC page and extract the member list. Uses Sonnet for accuracy on
+    long lists. Returns None on failure, [] if the page yielded no recognisable
+    members."""
+    if not ANTHROPIC_KEY:
+        return None
+    page = _fetch_page(pc_url)
+    if not page:
+        return None
+    # Sonnet handles structured long-list extraction more reliably than Haiku.
+    # Use a larger token budget so PCs up to ~800 members fit in one response.
+    from anthropic import Anthropic
+    client = Anthropic(api_key=ANTHROPIC_KEY)
+    try:
+        msg = client.messages.create(
+            model=MODEL_STRONG, max_tokens=16384,
+            messages=[{"role": "user", "content": _PC_EXTRACT_PROMPT.format(page=page)}],
+        )
+    except Exception:  # noqa: BLE001
+        return None
+    body = "".join(b.text for b in msg.content if hasattr(b, "text"))
+    result = _parse_json(body)
+    if not result:
+        return None
+    members = result.get("members")
+    if not isinstance(members, list):
+        return []
+    out: list[dict] = []
+    for m in members:
+        if not isinstance(m, dict):
+            continue
+        name = m.get("name")
+        if not isinstance(name, str) or not name.strip():
+            continue
+        role = m.get("role") or "member"
+        if role not in {"member", "area-chair", "track-chair", "program-chair", "general-chair"}:
+            role = "member"
+        aff = m.get("affiliation")
+        out.append({
+            "name": name.strip(),
+            "affiliation": (aff.strip() if isinstance(aff, str) and aff.strip() else None),
+            "role": role,
+        })
+    return out
+
+
 def enrich_seed_venues() -> dict[str, int]:
     """For seed/llm_extract rows with a cfp_url, run two-pass extraction."""
     if not ANTHROPIC_KEY:
@@ -401,7 +748,7 @@ def enrich_seed_venues() -> dict[str, int]:
                     if parsed is not None:
                         setattr(row, f, parsed.replace(tzinfo=None))
             row.source = "llm_extract"
-            row.last_verified = datetime.utcnow()
+            row.last_verified = _common.utc_now()
             row.diverged = bool(result.get("_diverged"))
             updated += 1
         db.commit()
