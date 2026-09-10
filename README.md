@@ -158,8 +158,10 @@ Both user additions and official date changes remain pending until merged.
 Merged snapshots are imported on refresh and survive redeployment because they
 are in Git. A rejected/closed PR is not automatically reopened.
 
-The scheduled `.github/workflows/venue-updates.yml` runs independently of the web
-server. Add `ANTHROPIC_API_KEY` to repository Actions secrets and enable
+The scheduled `.github/workflows/venue-updates.yml` runs weekly on Mondays at
+06:17 UTC (08:17 Zurich summer time / 07:17 winter time), independently of the web
+server. It can also be started manually from GitHub Actions. Add
+`ANTHROPIC_API_KEY` to repository Actions secrets and enable
 **Allow GitHub Actions to create and approve pull requests** in repository
 Actions settings; the workflow only creates PRs and never approves or merges.
 Its `GITHUB_TOKEN` is supplied by Actions automatically. Runtime state uses an

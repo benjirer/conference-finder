@@ -2,7 +2,7 @@ name: Review venue updates
 on:
   workflow_dispatch:
   schedule:
-    - cron: '17 */6 * * *'
+    - cron: '17 6 * * 1' # Mondays at 06:17 UTC
 permissions:
   contents: write
   pull-requests: write
