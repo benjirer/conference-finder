@@ -1,0 +1,29 @@
+{
+  "identity": "IJCAI-ECAI 2026",
+  "kind": "user",
+  "payload": {
+    "diverged": [
+      "name"
+    ],
+    "submitted_at": "2026-09-10T15:49:46.623478",
+    "url": "https://2026.ijcai.org/",
+    "venue": {
+      "abstract_deadline": "2026-01-12",
+      "acronym": "IJCAI-ECAI",
+      "areas": [
+        "ml",
+        "robotics"
+      ],
+      "conference_end": "2026-08-21",
+      "conference_start": "2026-08-15",
+      "is_workshop": false,
+      "location": "Bremen, Germany",
+      "name": "35th International Joint Conference on Artificial Intelligence",
+      "notification_date": "2026-04-29",
+      "page_limit": 7,
+      "submission_deadline": "2026-01-19",
+      "withdrawn": [],
+      "year": 2026
+    }
+  }
+}
