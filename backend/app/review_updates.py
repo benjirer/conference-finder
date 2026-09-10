@@ -1,15 +1,112 @@
-"""Propose immutable, content-addressed data updates through GitHub PRs.
-
-Each changed venue snapshot gets its own file, avoiding conflicting edits to
-one shared YAML file. No auto-merge. Repeated submissions reuse the same PR.
-"""
+"""Review official updates in one rolling PR; user additions get individual PRs."""
 import base64
 import hashlib
+import html
 import json
 import os
 from pathlib import Path
+from urllib.parse import quote
+from uuid import uuid4
 
 import httpx
+
+SCHEDULED_BRANCH_PREFIX = 'codex/scheduled-venue-updates-'
+SUMMARY_PATH = 'backend/data/scheduled_review.md'
+SUMMARY_HEADER = ('Scheduled website checks update this PR until it is merged or closed. '
+    'Merge to approve the snapshots for the next deployment. '
+    'Previous dates may be estimated or unverified.\n\n'
+    '| Venue | Date changes (previous → proposed) | Source |\n'
+    '| --- | --- | --- |\n')
+
+
+def _cell(value):
+    return html.escape(str(value)).replace('|', '&#124;').replace('\n', ' ').replace('\r', ' ')
+
+
+def _summary_row(identity, payload, key):
+    previous = {entry['round']: entry for entry in payload.get('previous_dates', [])}
+    changes = []
+    for entry in payload['dates']:
+        old = previous.get(entry['round'], {})
+        for field, value in entry.items():
+            if field == 'round':
+                continue
+            before = old.get(field)
+            if value == before:
+                continue
+            changes.append(f"R{entry['round']} {_cell(field.replace('_', ' '))}: "
+                f"{_cell(before or 'unknown')} → {_cell(value if value is not None else 'withdrawn')}")
+    details = '<br>'.join(changes) or 'Confirm existing dates'
+    if payload.get('warnings'):
+        details += '<br>Extraction warnings: ' + _cell(', '.join(payload['warnings']))
+    source = quote(payload['url'], safe=':/?#=&%+-._~')
+    return f'| {_cell(identity)} <!-- {key} --> | {details} | [CFP](<{source}>) |\n'
+
+
+def _propose_scheduled(client, request, repo, base, identity, payload, content):
+    # Discover the open PR through GitHub, so this survives cache loss and restarts.
+    # Workflow concurrency serializes scheduled writers.
+    current = None
+    page = 1
+    while True:
+        pulls = request('GET', 'pulls', params={'state': 'open', 'base': base,
+            'per_page': 100, 'page': page})
+        current = next((pr for pr in pulls
+            if pr['head']['ref'].startswith(SCHEDULED_BRANCH_PREFIX)
+            and (pr['head'].get('repo') or {}).get('full_name') == repo), None)
+        if current or len(pulls) < 100:
+            break
+        page += 1
+    branch = current['head']['ref'] if current else SCHEDULED_BRANCH_PREFIX + uuid4().hex[:12]
+    if current is None:
+        sha = request('GET', f'git/ref/heads/{base}')['object']['sha']
+        request('POST', 'git/refs', json={'ref': f'refs/heads/{branch}', 'sha': sha})
+
+    def read_file(path):
+        response = client.get(f'contents/{path}', params={'ref': branch})
+        if response.status_code == 404:
+            return None, None
+        response.raise_for_status()
+        data = response.json()
+        return base64.b64decode(data['content']).decode(), data['sha']
+
+    def write_file(path, text, previous, sha):
+        if text == previous:
+            return
+        body = {'message': f'Update scheduled review: {identity}', 'branch': branch,
+            'content': base64.b64encode(text.encode()).decode()}
+        if sha:
+            body['sha'] = sha
+        request('PUT', f'contents/{path}', json=body)
+
+    # One file per edition: another finding supersedes its pending snapshot.
+    key = hashlib.sha256(json.dumps([payload['acronym'], payload['year']]).encode()).hexdigest()[:20]
+    path = f'backend/data/reviewed_updates/scheduled-{key}.json'
+    old, sha = read_file(path)
+    write_file(path, content, old, sha)
+    old_summary, summary_sha = read_file(SUMMARY_PATH)
+    summary = old_summary if current and old_summary else SUMMARY_HEADER
+    marker = f'<!-- {key} -->'
+    rows = [line for line in summary.splitlines(keepends=True) if marker not in line]
+    summary = ''.join(rows) + _summary_row(identity, payload, key)
+    write_file(SUMMARY_PATH, summary, old_summary, summary_sha)
+    # Keep the full table in a reviewable file even for catalogues that exceed
+    # GitHub's PR body limit. Never truncate a table row midway.
+    link = f'https://github.com/{repo}/blob/{branch}/{SUMMARY_PATH}'
+    footer = f'\n[Full review summary]({link}). Each venue snapshot is in Files changed.\n'
+    body = ''
+    for line in summary.splitlines(keepends=True):
+        if len(body) + len(line) > 55000:
+            body += '\nAdditional venues are listed in the full review summary.\n'
+            break
+        body += line
+    body += footer
+    if current:
+        request('PATCH', f"pulls/{current['number']}", json={'body': body})
+        return current['html_url']
+    pr = request('POST', 'pulls', json={'title': 'Review scheduled venue updates',
+        'head': branch, 'base': base, 'body': body})
+    return pr['html_url']
 
 
 def enabled():
@@ -37,6 +134,8 @@ def propose(kind, identity, payload):
             return response.json()
         metadata = request('GET', '')
         base = metadata['default_branch']
+        if kind == 'official':
+            return _propose_scheduled(client, request, repo, base, identity, payload, content)
         pulls = request('GET', 'pulls', params={'head': f'{repo.split("/")[0]}:{branch}', 'state': 'all'})
         if pulls:
             return pulls[0]['html_url']

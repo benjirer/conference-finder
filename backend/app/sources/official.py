@@ -232,9 +232,20 @@ def refresh_official():
                             raise original
                     from .. import review_updates
                     if review_updates.enabled() and check.payload != json.dumps(payload):
+                        previous_dates = []
+                        for row in db.query(Conference).filter_by(acronym=check.acronym, year=check.year):
+                            entry = {'round': row.round}
+                            metadata = json.loads(row.date_metadata or '{}')
+                            for field in DATE_FIELDS:
+                                value = getattr(row, field)
+                                if value and metadata.get(field, {}).get('precision') == 'date':
+                                    value = value.date()
+                                entry[field] = value.isoformat() if value else None
+                            previous_dates.append(entry)
                         review_url = review_updates.propose('official', f'{check.acronym} {check.year}', {
                             'acronym': check.acronym, 'year': check.year, 'url': fetched_url,
                             'dates': payload, 'verified_at': now.isoformat(), 'content_hash': digest,
+                            'previous_dates': previous_dates,
                             'warnings': result.get('_diverged', [])})
                         db.merge(PendingReview(key=pending_key, content_hash=digest, review_url=review_url))
                         check.error = 'Pending review: ' + review_url

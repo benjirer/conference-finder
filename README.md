@@ -145,12 +145,18 @@ Set `CONFERENCE_FINDER_GITHUB_TOKEN` (or `GITHUB_TOKEN`) and
 The token needs repository Contents and Pull requests read/write permissions.
 Local credentials can be stored in `backend/.env`, which is ignored by Git.
 
-Each changed venue snapshot creates a PR containing one JSON file under
-`backend/data/reviewed_updates/`. Repeated identical proposals reuse their PR.
-User additions return the PR link and remain pending until merged. Official
-checks also queue changed dates for review instead of applying them immediately.
+Scheduled official checks collect changes in **one open PR**. Later checks update
+that PR and replace the pending snapshot for an edition when its dates change
+again. The PR includes a table of previous/proposed dates and source links;
+`backend/data/scheduled_review.md` holds the full table for large batches.
+After the PR is merged or closed, the next new proposal starts a fresh PR from
+the default branch. The workflow concurrency group serializes scheduled writers.
+
+User additions still get individual PRs with JSON snapshots under
+`backend/data/reviewed_updates/`; identical submissions reuse their PR.
+Both user additions and official date changes remain pending until merged.
 Merged snapshots are imported on refresh and survive redeployment because they
-are in Git. A rejected/closed proposal is not automatically reopened.
+are in Git. A rejected/closed PR is not automatically reopened.
 
 The scheduled `.github/workflows/venue-updates.yml` runs independently of the web
 server. Add `ANTHROPIC_API_KEY` to repository Actions secrets and enable
