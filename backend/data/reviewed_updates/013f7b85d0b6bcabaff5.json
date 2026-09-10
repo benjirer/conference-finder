@@ -1,0 +1,28 @@
+{
+  "identity": "PACMI 2026",
+  "kind": "user",
+  "payload": {
+    "diverged": [],
+    "submitted_at": "2026-09-10T15:14:03.160817",
+    "url": "https://sites.google.com/view/pacmi/home",
+    "venue": {
+      "acronym": "PACMI",
+      "areas": [
+        "ml",
+        "systems"
+      ],
+      "camera_ready": "2026-08-30",
+      "conference_end": "2026-09-29",
+      "conference_start": "2026-09-29",
+      "is_workshop": true,
+      "location": "Prague, Czechia",
+      "name": "Practical Adoption Challenges of ML for Systems",
+      "notification_date": "2026-08-12",
+      "page_limit": 4,
+      "parent_venue": "SOSP",
+      "submission_deadline": "2026-07-18",
+      "withdrawn": [],
+      "year": 2026
+    }
+  }
+}
