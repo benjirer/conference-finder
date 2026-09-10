@@ -23,14 +23,7 @@ _DATE_FIELDS = (
 
 
 def _parse_iso(value):
-    if value is None:
-        return None
-    if isinstance(value, datetime):
-        return value
-    try:
-        return dparser.parse(str(value))
-    except (ValueError, TypeError, OverflowError):
-        return None
+    return _common.parse_iso_date(value)
 
 
 def ingest_seed() -> dict[str, int]:
@@ -60,14 +53,18 @@ def ingest_seed() -> dict[str, int]:
             if "topics" in v:
                 row.topics = json.dumps(v["topics"])
             for f in _DATE_FIELDS:
-                if f in v:
-                    setattr(row, f, _parse_iso(v[f]))
+                if f in v and (getattr(row, f) is None or row.source == "seed" or row.predicted):
+                    parsed = _parse_iso(v[f])
+                    if parsed is not None:
+                        _common.promote_prediction(row)
+                        setattr(row, f, parsed)
             for f in ("page_limit", "format_notes", "tier", "location",
                       "website", "cfp_url", "is_workshop", "parent_venue", "notes"):
                 if f in v:
                     setattr(row, f, v[f])
-            row.source = "seed"
-            row.last_verified = now
+            if row.source in (None, "seed", "predicted"):
+                row.source = "seed"
+            # Loading a static snapshot is not a fresh verification.
             upserted += 1
         db.commit()
     return {"upserted": upserted}

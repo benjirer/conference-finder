@@ -101,6 +101,13 @@ def _deadline_events(c: Conference, when: datetime, label: str) -> list[str]:
         "END:VEVENT",
     ]
 
+    import json
+    field = {'Abstract deadline': 'abstract_deadline', 'Paper deadline': 'submission_deadline',
+             'Notification': 'notification_date', 'Camera-ready': 'camera_ready'}.get(label)
+    metadata = json.loads(c.date_metadata or '{}')
+    if metadata.get(field, {}).get('precision') == 'date':
+        return all_day
+
     # 2. One-hour timed event ending AT the deadline (so the slot leading up to
     #    it appears in calendar). DTSTART/DTEND in UTC (Z), clients render local.
     end = when

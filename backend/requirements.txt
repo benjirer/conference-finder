@@ -11,3 +11,7 @@ selectolax==0.3.27
 # Test deps — installed via `pip install -r requirements.txt` so tests run on
 # Render too. Keeping pytest in the main requirements is fine for a small app.
 pytest==8.3.4
+
+pypdf==6.18.0
+playwright==1.62.0
+python-dotenv==1.2.2

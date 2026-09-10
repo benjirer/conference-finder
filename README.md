@@ -33,7 +33,7 @@ Single-binary backend (FastAPI + SQLite), no Node/npm. Designed to run free on
 ## Architecture
 
 ```
-┌──────── refresh pipeline (17 steps, idempotent, no API calls) ────────┐
+┌──────── refresh pipeline (aggregators + official CFP checks) ────────┐
 │                                                                       │
 │  1. confsearch                                                        │
 │  2. noise-lab                                                         │
@@ -52,6 +52,7 @@ Single-binary backend (FastAPI + SQLite), no Node/npm. Designed to run free on
 │ 15. reconcile                  ← cross-source date verification       │
 │ 16. predict next-year          ← extrapolate one year forward         │
 │ 17. predict missing tiers      ← h5_index heuristic                   │
+│ 18. official CFP checks       ← changed pages only; API key required  │
 │                                                                       │
 └───────────────────────────────────────────────────────────────────────┘
                               ▼
@@ -65,13 +66,109 @@ Single-binary backend (FastAPI + SQLite), no Node/npm. Designed to run free on
 ```
 
 **Two side-cars for one-shot LLM enrichment** (run *locally*, commit their YAML
-caches so Render never has to make API calls):
+caches for bulk enrichment):
 
 - `python -m app.enrich_extras` — fills missing date fields, page limits,
   multi-round info from each venue's CFP page (~$2 for a full pass).
 - `python -m app.enrich_pc` — discovers each venue's PC page and extracts the
   member list (~$3 for a full pass).
 - `python -m app.enrich` — runs both, then refreshes the DB in one command.
+
+## Reliability and deployment configuration
+
+- Public aggregators refresh in the background every six hours, starting one
+  shortly after the web server starts. Set `CONFERENCE_FINDER_REFRESH_HOURS=0`
+  to disable this (for an external scheduler); otherwise use a positive number.
+  Run one Uvicorn worker to avoid duplicate refresh jobs. Sleeping/stopped hosts
+  cannot run periodic checks. `/api/refresh-status` reports the latest run and
+  source failures. `/api/health` remains the lightweight health check.
+- ccfddl coverage is discovered from its repository in the supported categories,
+  with the curated venue list as a fallback if discovery fails. This broadens
+  coverage; it does not guarantee every conference is represented.
+- Published editions replace predicted dates; later aggregator updates can
+  change existing deadlines. Static seed dates do not overwrite live dates.
+- Deadline offsets and IANA timezones are normalized to UTC, and the API marks
+  timestamps with `Z`. Incomplete dates are left unknown. Extraction follows up
+  to three same-site CFP/dates links and removes struck-out text.
+- User additions use locked, atomic YAML writes. Set
+  `CONFERENCE_FINDER_DATA_DIR` to a **persistent mounted directory** to keep
+  `conferences.db` and `user_added.yaml` across deploys. Bundled seeds and
+  enrichment caches still load from the repository. Copy any existing
+  `backend/data/user_added.yaml` into the mounted directory when migrating.
+  Back up this directory; user additions are not disposable cache data.
+- The included free/ephemeral Render configuration does **not** provide durable
+  storage. Setting a directory variable without mounting durable storage is
+  insufficient. Provision a persistent volume or deploy on a host with durable
+  local storage before relying on public additions surviving redeploys.
+- Every refresh also checks official CFP/homepage URLs for current and future
+  editions, including user additions and predictions. Checks run after source
+  ingestion and replay accepted official dates, so stale aggregator data cannot
+  undo an official correction. Newly predicted editions are included immediately.
+- All due official pages are fetched each sweep using six concurrent workers
+  (`CONFERENCE_FINDER_FETCH_WORKERS`). `CONFERENCE_FINDER_OFFICIAL_LIMIT=0`
+  means no page-count cap; a positive value is an optional cap. The minimum
+  interval per edition remains 24 hours (`CONFERENCE_FINDER_OFFICIAL_HOURS`).
+  `CONFERENCE_FINDER_EXTRACTION_LIMIT=100` separately bounds changed-page
+  extraction attempts per sweep; queued pages retry next time. Scanned-PDF
+  transcription also uses the API, separately from this extraction limit.
+  Set `CONFERENCE_FINDER_OFFICIAL_ENABLED=0` to disable live checks.
+- Official-page text is hashed before extraction. Unchanged successful pages
+  need no model calls. Changed/new pages use the existing two-pass extractor
+  and require `ANTHROPIC_API_KEY`; this incurs API usage. Venue identity, edition,
+  date ordering, and submission-round agreement are checked before accepting
+  dates. Failures retain the last accepted dates and retry on a later run.
+- `/api/official-checks` exposes each URL, check time, verification time, and
+  error. The `official_checks` SQLite table saves hashes and accepted dates on
+  the configured runtime volume. Back up the database along with user YAML.
+- PDFs use text extraction, with a cached document-model transcription fallback
+  for scans. JavaScript app shells use Playwright Chromium; install it with
+  `python -m playwright install chromium` (Linux hosts may also need
+  `python -m playwright install --with-deps chromium`). Failed linked pages
+  no longer discard readable content from the main CFP.
+- When the known page identifies an old edition, discovery follows next-edition
+  links and probes year URL variants. Candidate pages must still pass identity
+  and date validation. This cannot discover every site's naming convention.
+- Official snapshots stop overriding source data after a failed check or 14 days
+  without verification (`CONFERENCE_FINDER_OFFICIAL_MAX_AGE_DAYS`). Explicitly
+  retracted dates are cleared when extraction agrees on withdrawal. Merely
+  missing dates are not treated as retracted.
+- Per-field `date_metadata` records official confirmation, source, verification
+  time and date/date-time precision. The dashboard shows stale/confirmed state.
+  Confirmed date-only values remain dates in the API and generate no invented
+  final-hour calendar event. Older source data without this metadata is shown
+  as unverified.
+
+### Review updates through GitHub
+
+Set `CONFERENCE_FINDER_GITHUB_TOKEN` (or `GITHUB_TOKEN`) and
+`CONFERENCE_FINDER_GITHUB_REPO=benjirer/conference-finder` to enable PR review.
+The token needs repository Contents and Pull requests read/write permissions.
+Local credentials can be stored in `backend/.env`, which is ignored by Git.
+
+Each changed venue snapshot creates a PR containing one JSON file under
+`backend/data/reviewed_updates/`. Repeated identical proposals reuse their PR.
+User additions return the PR link and remain pending until merged. Official
+checks also queue changed dates for review instead of applying them immediately.
+Merged snapshots are imported on refresh and survive redeployment because they
+are in Git. A rejected/closed proposal is not automatically reopened.
+
+The scheduled `.github/workflows/venue-updates.yml` runs independently of the web
+server. Add `ANTHROPIC_API_KEY` to repository Actions secrets and enable
+**Allow GitHub Actions to create and approve pull requests** in repository
+Actions settings; the workflow only creates PRs and never approves or merges.
+Its `GITHUB_TOKEN` is supplied by Actions automatically. Runtime state uses an
+Actions cache as an optimization; merged snapshots remain the durable record.
+The web process can still run its own checks; set
+`CONFERENCE_FINDER_OFFICIAL_ENABLED=0` there to avoid duplicate paid work when
+using Actions. GitHub scheduling is not a precise timer.
+
+### Live verification
+
+`python backend/scripts/check_live_pages.py` checks public HTML/PDF retrieval.
+`python backend/scripts/check_live_extraction.py` uses the API key to compare
+extracted dates from three real CFPs (including CGO submission rounds) against manually checked values. Neither
+command modifies venue data or creates PRs. Unit tests use mocked API responses;
+live scripts must be run separately. `check_browser_and_scanned_pdf.py` exercises a real isolated browser and a scanned-PDF fixture; `--app` verifies the Data status dialog and recheck form. Set `CONFERENCE_FINDER_BROWSER_EXECUTABLE` to use an existing compatible Chrome executable instead of Playwright’s downloaded browser.
 
 ## Setup
 
@@ -97,8 +194,7 @@ python -m app.enrich                 # one command: extras + pc + refresh
 ```
 
 Run once, then commit `backend/data/cached_extras.yaml` and `cached_pc.yaml`.
-Re-run monthly (or with `--force --acronym X` for a single venue). The
-local-only design keeps Render's Anthropic spend at $0.
+Re-run monthly (or with `--force --acronym X` for a single venue). Scheduled official-page checks also use the key when page content changes.
 
 ### Tests
 
@@ -106,7 +202,7 @@ local-only design keeps Render's Anthropic spend at $0.
 python -m pytest tests/ -q
 ```
 
-35 smoke tests covering helpers, API endpoints, refresh pipeline, rate-limit
+Regression and smoke tests covering helpers, API endpoints, refresh pipeline, rate-limit
 guard, enrichment cache.
 
 ## Deploying for free on Render
@@ -121,14 +217,15 @@ guard, enrichment cache.
    keeps working.
 
 Render auto-deploys on every push. The free tier sleeps after 15 min idle
-(~60 s cold-start to rebuild the DB from sources + committed caches).
+(the server starts before the background data refresh finishes).
 
 ### What does and doesn't cost tokens
 
 | Action | Cost | When |
 |---|---|---|
-| Render cold start | $0 | automatic |
-| Daily refreshes / users browsing | $0 | automatic |
+| Render cold start | API usage for new/changed official pages | automatic |
+| Scheduled refreshes | API usage for changed official pages; unchanged pages skip extraction | automatic |
+| Users browsing | $0 in LLM usage | on request |
 | `+ Add venue` button | ~$0.01 | only when someone clicks |
 | `python -m app.enrich` (local) | ~$3–5 full pass | only when you run it |
 
@@ -175,7 +272,7 @@ backend/
     venue_stats.yaml       ← per-acronym h5/accept/page (commit changes)
     cached_extras.yaml     ← LLM cache for dates (commit, auto-generated)
     cached_pc.yaml         ← LLM cache for PCs   (commit, auto-generated)
-    user_added.yaml        ← venues from + Add (commit if you want them on Render)
+    user_added.yaml        ← local default; use durable DATA_DIR in production
     conferences.db         ← SQLite, regenerated on every refresh (gitignored)
   tests/                   ← pytest smoke tests
   requirements.txt
