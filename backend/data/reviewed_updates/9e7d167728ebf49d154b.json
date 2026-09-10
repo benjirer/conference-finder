@@ -1,0 +1,29 @@
+{
+  "identity": "MHV 2027",
+  "kind": "user",
+  "payload": {
+    "diverged": [
+      "location"
+    ],
+    "submitted_at": "2026-09-10T15:50:46.158786",
+    "url": "https://www.mile-high.video/call-for-contributions",
+    "venue": {
+      "abstract_deadline": "2026-10-09",
+      "acronym": "MHV",
+      "areas": [
+        "networking",
+        "ml",
+        "multimedia"
+      ],
+      "camera_ready": "2027-02-05",
+      "is_workshop": false,
+      "location": "Denver, United States",
+      "name": "ACM MHV'27",
+      "notification_date": "2027-01-15",
+      "page_limit": 8,
+      "submission_deadline": "2026-12-11",
+      "withdrawn": [],
+      "year": 2027
+    }
+  }
+}
