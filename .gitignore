@@ -8,3 +8,9 @@ frontend/dist/
 .DS_Store
 .env
 .claude/
+
+backend/data/*.lock
+
+backend/.playwright/
+runtime-data/
+backend/data/pdf_text/

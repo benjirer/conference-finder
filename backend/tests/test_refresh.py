@@ -22,8 +22,9 @@ def offline_refresh(temp_db, monkeypatch):
     """Patch every network-bound step to be a no-op so we can run refresh offline."""
     from app.sources import (
         ccfddl, aideadlines, ds_deadlines, klb2, noise_lab, confsearch,
-        cached_extras, cached_pc, llm_extract, geocode,
+        cached_extras, cached_pc, llm_extract, geocode, official,
     )
+    monkeypatch.setattr(official, "refresh_official", lambda: {"checked": 0})
     monkeypatch.setattr(ccfddl, "ingest_all", lambda: {"upserted": 0})
     monkeypatch.setattr(aideadlines, "ingest_all", lambda: {"added": 0, "recorded": 0})
     monkeypatch.setattr(ds_deadlines, "ingest_all", lambda: {"added": 0, "recorded": 0})

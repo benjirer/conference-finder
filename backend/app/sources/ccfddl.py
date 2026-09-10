@@ -66,69 +66,40 @@ VENUE_MAP: dict[tuple[str, str], dict[str, Any]] = {
 }
 
 
-def _parse_ts(s: str | None) -> datetime | None:
-    if not s:
+def _parse_ts(s):
+    return _common.parse_iso_date(s, normalize=False)
+
+
+def _to_utc(dt, tz_str):
+    if dt is None:
         return None
-    s = s.strip()
-    # ccfddl uses "YYYY-MM-DD HH:MM:SS" without TZ; we treat as UTC-12 (AoE-like)
-    # if the venue's timezone is unset. The per-venue `timezone` field is applied
-    # by the caller. Returning naive datetime here; caller offsets to UTC.
-    for fmt in ("%Y-%m-%d %H:%M:%S", "%Y-%m-%d"):
-        try:
-            return datetime.strptime(s, fmt)
-        except ValueError:
-            continue
-    return None
-
-
-def _tz_offset_hours(tz_str: str | None) -> int:
-    if not tz_str:
-        return -12  # AoE-like default
-    tz_str = tz_str.strip().upper().replace("UTC", "")
-    if not tz_str:
-        return 0
     try:
-        return int(tz_str)
+        return _common.to_utc(dt, tz_str)
     except ValueError:
-        return -12
-
-
-def _to_utc(local_dt: datetime | None, tz_str: str | None) -> datetime | None:
-    if local_dt is None:
         return None
-    offset = _tz_offset_hours(tz_str)
-    return (local_dt - timedelta(hours=offset)).replace(tzinfo=timezone.utc).replace(tzinfo=None)
 
 
-def _parse_conf_date_range(date_str: str | None, year: int) -> tuple[datetime | None, datetime | None]:
-    """Best-effort parse of ccfddl's free-form `date` field, e.g. 'July 11-19, 2025'."""
-    if not date_str:
-        return None, None
-    from dateutil import parser as dparser
-    import re
-    m = re.match(r"^([A-Za-z]+)\s+(\d+)\s*[-–]\s*(\d+)[,\s]+(\d{4})", date_str.strip())
-    if m:
-        month, d1, d2, yr = m.group(1), int(m.group(2)), int(m.group(3)), int(m.group(4))
-        try:
-            start = dparser.parse(f"{month} {d1}, {yr}")
-            end = dparser.parse(f"{month} {d2}, {yr}")
-            return start, end
-        except (ValueError, OverflowError):
-            pass
-    # Cross-month range, e.g. "July 28 - August 2, 2025"
-    m2 = re.match(r"^([A-Za-z]+)\s+(\d+)\s*[-–]\s*([A-Za-z]+)\s+(\d+)[,\s]+(\d{4})", date_str.strip())
-    if m2:
-        try:
-            start = dparser.parse(f"{m2.group(1)} {m2.group(2)}, {m2.group(5)}")
-            end = dparser.parse(f"{m2.group(3)} {m2.group(4)}, {m2.group(5)}")
-            return start, end
-        except (ValueError, OverflowError):
-            pass
+_parse_conf_date_range = _common.parse_date_range
+
+
+def discover_venues():
+    """Discover the repository tree; retain curated metadata and offline fallback."""
+    venues = dict(VENUE_MAP)
+    response = _common.http_get(
+        "https://api.github.com/repos/ccfddl/ccf-deadlines/git/trees/main?recursive=1")
+    if response is None:
+        return venues
+    areas = {"NW": ["networking"], "AI": ["ml"], "CG": ["multimedia"],
+             "DS": ["systems"], "SE": ["systems"], "SC": ["systems"],
+             "MX": ["systems", "ml"]}
     try:
-        single = dparser.parse(date_str, default=datetime(year, 1, 1))
-        return single, single
-    except (ValueError, OverflowError):
-        return None, None
+        for entry in response.json().get("tree", []):
+            parts = entry.get("path", "").split("/")
+            if len(parts) == 3 and parts[0] == "conference" and parts[1] in areas and parts[2].endswith((".yml", ".yaml")):
+                venues.setdefault((parts[1], parts[2]), {"areas": areas[parts[1]]})
+    except (ValueError, TypeError, AttributeError):
+        pass
+    return venues
 
 
 def fetch_ccfddl_venue(category: str, filename: str) -> dict | None:
@@ -148,7 +119,7 @@ def ingest_all() -> dict[str, int]:
     upserted = 0
     errors = 0
     with SessionLocal() as db:
-        for (cat, fname), meta in VENUE_MAP.items():
+        for (cat, fname), meta in discover_venues().items():
             data = fetch_ccfddl_venue(cat, fname)
             if not data:
                 errors += 1
@@ -184,10 +155,12 @@ def ingest_all() -> dict[str, int]:
                         row = Conference(acronym=acronym, year=year, round=idx, name=name)
                         db.add(row)
                         db.flush()
+                    _common.promote_prediction(row)
                     row.name = name
                     row.rounds_total = rounds_total
                     row.areas = json.dumps(meta.get("areas", []))
                     row.tier = meta.get("tier") or _common.normalize_tier(data.get("rank")) or row.tier
+                    row.date_metadata = None
                     row.abstract_deadline = abstract
                     row.submission_deadline = deadline
                     row.conference_start = start

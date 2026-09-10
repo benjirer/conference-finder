@@ -51,6 +51,7 @@ class Conference(Base):
     diverged_detail: Mapped[str | None] = mapped_column(Text, nullable=True)  # JSON list of {source, field, value} when sources disagree
     predicted: Mapped[bool] = mapped_column(Boolean, default=False)
     tier_predicted: Mapped[bool] = mapped_column(Boolean, default=False)  # tier was inferred from h5_index/acceptance_rate, not directly known
+    date_metadata: Mapped[str | None] = mapped_column(Text, nullable=True)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
 
 
@@ -101,3 +102,26 @@ class PCMember(Base):
     affiliation: Mapped[str | None] = mapped_column(String(256), nullable=True)
     # Role taxonomy: member | area-chair | track-chair | program-chair | general-chair
     role: Mapped[str] = mapped_column(String(32), default="member")
+
+
+class OfficialCheck(Base):
+    """Durable check state and last accepted extraction for an official edition."""
+    __tablename__ = "official_checks"
+    __table_args__ = (UniqueConstraint("acronym", "year", "url", name="uq_official_edition_url"),)
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    acronym: Mapped[str] = mapped_column(String(64))
+    year: Mapped[int] = mapped_column(Integer)
+    url: Mapped[str] = mapped_column(Text)
+    checked_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    verified_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    content_hash: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    payload: Mapped[str | None] = mapped_column(Text, nullable=True)
+    error: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+
+class PendingReview(Base):
+    __tablename__ = 'pending_reviews'
+    key: Mapped[str] = mapped_column(String(128), primary_key=True)
+    content_hash: Mapped[str] = mapped_column(String(64))
+    review_url: Mapped[str] = mapped_column(Text)

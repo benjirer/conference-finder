@@ -32,16 +32,22 @@ const $ = (sel) => document.querySelector(sel);
 
 function fmt(d) {
   if (!d) return "—";
-  const dt = new Date(d);
+  const dt = new Date(/^\d{4}-\d{2}-\d{2}$/.test(d) ? d + "T12:00:00" : d);
   if (isNaN(dt.getTime())) return "—";
   return dt.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
 }
 
 function daysUntil(d) {
   if (!d) return null;
-  const dt = new Date(d);
+  const dt = new Date(/^\d{4}-\d{2}-\d{2}$/.test(d) ? d + "T12:00:00" : d);
   if (isNaN(dt.getTime())) return null;
   return Math.round((dt.getTime() - Date.now()) / 86400000);
+}
+
+function dateNote(c, field) {
+  const info = c.date_metadata?.[field];
+  if (!info) return c.predicted ? "Estimated from a previous edition" : "Source date; not independently confirmed";
+  return `${info.status} · ${info.precision === "date" ? "time not stated" : "time stated"} · ${info.source} · checked ${info.checked_at}`;
 }
 
 function deadlineClass(d, predicted) {
@@ -299,9 +305,9 @@ function renderRow(c) {
     ${locationCell}
     ${areasCell}
     ${tierCell}
-    <td class="deadline ${deadlineClass(c.abstract_deadline, c.predicted)}">${fmt(c.abstract_deadline)}</td>
-    <td class="deadline ${deadlineClass(c.submission_deadline, c.predicted)}">${fmt(c.submission_deadline)}</td>
-    <td class="deadline ${deadlineClass(c.notification_date, c.predicted)}">${fmt(c.notification_date)}</td>
+    <td class="deadline ${deadlineClass(c.abstract_deadline, c.predicted)}">${fmt(c.abstract_deadline)}<div class="muted" style="font-size:10px" title="${escapeHtml(dateNote(c, "abstract_deadline"))}">${escapeHtml(c.date_metadata?.abstract_deadline?.status || (c.predicted ? "estimated" : "unverified"))}</div></td>
+    <td class="deadline ${deadlineClass(c.submission_deadline, c.predicted)}">${fmt(c.submission_deadline)}<div class="muted" style="font-size:10px" title="${escapeHtml(dateNote(c, "submission_deadline"))}">${escapeHtml(c.date_metadata?.submission_deadline?.status || (c.predicted ? "estimated" : "unverified"))}</div></td>
+    <td class="deadline ${deadlineClass(c.notification_date, c.predicted)}">${fmt(c.notification_date)}<div class="muted" style="font-size:10px" title="${escapeHtml(dateNote(c, "notification_date"))}">${escapeHtml(c.date_metadata?.notification_date?.status || (c.predicted ? "estimated" : "unverified"))}</div></td>
     <td class="deadline${c.predicted ? " predicted" : ""}">${conf}</td>
     <td>${c.page_limit ?? "—"}</td>
     <td>${accept}</td>
@@ -384,7 +390,14 @@ function setupAddModal() {
         status.textContent = "Error: " + (body.detail || r.statusText);
         return;
       }
-      status.textContent = `Added: ${body.acronym} ${body.year} (source: ${body.source})`;
+      status.textContent = body.review_url ? `Submitted for review: ${body.acronym} ${body.year}. ` : `Added: ${body.acronym} ${body.year} (source: ${body.source})`;
+      if (body.review_url) {
+        const link = document.createElement("a");
+        link.href = body.review_url; link.textContent = "Review pull request";
+        link.target = "_blank"; link.rel = "noopener";
+        status.appendChild(link);
+        return;
+      }
       await load();
       setTimeout(() => { modal.style.display = "none"; }, 1500);
     } catch (e) {
@@ -704,6 +717,60 @@ function setupThemeToggle() {
   sync();
 }
 
+function setupDataStatus() {
+  const modal = $("#data-status-modal");
+  const summary = $("#data-status-summary");
+  const list = $("#data-status-list");
+  const search = $("#data-status-search");
+  let checks = [];
+  const render = () => {
+    list.replaceChildren();
+    const query = search.value.toLowerCase();
+    for (const check of checks.filter(c => `${c.acronym} ${c.year} ${c.error || ""}`.toLowerCase().includes(query))) {
+      const row = document.createElement("div");
+      row.style.cssText = "padding:12px 0;border-bottom:1px solid var(--border);";
+      const title = document.createElement("strong");
+      title.textContent = `${check.acronym} ${check.year}`;
+      const detail = document.createElement("p"); detail.className = "muted";
+      detail.textContent = check.error || (check.verified_at ? `Confirmed ${fmt(check.verified_at)}` : "Awaiting official-page check");
+      row.append(title, detail);
+      const source = document.createElement("a");
+      if (/^https?:\/\//.test(check.url)) {
+        source.href = check.url; source.target = "_blank"; source.rel = "noopener";
+        source.textContent = "Source page"; row.append(source);
+      }
+      const pr = check.error?.match(/https:\/\/github\.com\/[^\s]+\/pull\/\d+/)?.[0];
+      if (pr) {
+        const review = document.createElement("a"); review.href = pr;
+        review.textContent = " · Review proposal"; review.target = "_blank"; review.rel = "noopener";
+        row.append(review);
+      } else {
+        const retry = document.createElement("button"); retry.className = "subscribe-secondary";
+        retry.textContent = "Recheck this venue"; retry.style.marginLeft = "12px";
+        retry.onclick = () => { modal.style.display = "none"; $("#add-btn").click(); $("#add-url").value = check.url; };
+        row.append(retry);
+      }
+      list.append(row);
+    }
+    if (!list.children.length) list.textContent = "No matching venue checks.";
+  };
+  search.oninput = render;
+  $("#data-status-close").onclick = () => modal.style.display = "none";
+  modal.onclick = event => { if (event.target === modal) modal.style.display = "none"; };
+  $("#data-status-btn").onclick = async () => {
+    modal.style.display = "flex"; summary.textContent = "Loading check status…";
+    try {
+      const responses = await Promise.all([fetch("/api/official-checks"), fetch("/api/refresh-status")]);
+      if (responses.some(r => !r.ok)) throw new Error("Check status could not be loaded");
+      const [data, refresh] = await Promise.all(responses.map(r => r.json()));
+      checks = data.sort((a,b) => Number(Boolean(b.error)) - Number(Boolean(a.error)));
+      summary.textContent = `${checks.length} tracked editions. ${refresh.running ? "Refresh running." : ""} ${refresh.error || ""}`;
+      render();
+    } catch (error) { summary.textContent = error.message; }
+  };
+}
+
+setupDataStatus();
 renderAreaChips();
 renderAddAreaChips();
 loadYearChips();

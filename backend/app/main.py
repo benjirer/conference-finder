@@ -86,7 +86,12 @@ async def _lifespan(app: FastAPI):
     """FastAPI lifespan event — runs once on startup, replaces the deprecated
     `@app.on_event('startup')` pattern."""
     init_db()
-    yield
+    from .scheduler import start_refresh_worker
+    stop, thread = start_refresh_worker()
+    try:
+        yield
+    finally:
+        stop.set()
 
 
 app = FastAPI(title="Conference Finder", lifespan=_lifespan)
@@ -123,8 +128,10 @@ def root():
 
 def _serialize(c: Conference, pc_members_count: int = 0) -> dict:
     def iso(dt: datetime | None):
-        return dt.isoformat() if dt else None
-    return {
+        return dt.isoformat() + "Z" if dt else None
+    metadata = json.loads(c.date_metadata or "{}")
+    result = {
+        "date_metadata": metadata,
         "id": c.id,
         "acronym": c.acronym,
         "name": c.name,
@@ -162,6 +169,10 @@ def _serialize(c: Conference, pc_members_count: int = 0) -> dict:
         "predicted": c.predicted,
         "notes": c.notes,
     }
+    for field, info in metadata.items():
+        if field in result and result[field] and info.get('precision') == 'date':
+            result[field] = result[field][:10]
+    return result
 
 
 def _filter(
@@ -262,7 +273,7 @@ def conference_sources(conf_id: int, db: Session = Depends(get_db)):
         .all()
     )
     def iso(dt: datetime | None):
-        return dt.isoformat() if dt else None
+        return dt.isoformat() + "Z" if dt else None
     return {
         "acronym": c.acronym,
         "year": c.year,
@@ -474,10 +485,44 @@ def add_venue(body: AddVenueIn, request: Request):
     except (ValueError, TypeError):
         raise HTTPException(status_code=422, detail="Extracted year is not an integer.")
 
+    from . import review_updates
+    review_url = None
+    if review_updates.enabled():
+        try:
+            review_url = review_updates.propose('user', f"{extracted['acronym']} {extracted['year']}",
+                {'venue': extracted, 'url': url, 'diverged': diverged, 'submitted_at': datetime.utcnow().isoformat()})
+            return {**extracted, 'review_url': review_url, 'status': 'pending_review'}
+        except Exception as exc:
+            import httpx
+            log.exception('Could not create venue review proposal')
+            detail = 'GitHub could not save the venue proposal.'
+            if isinstance(exc, httpx.HTTPStatusError):
+                detail += f' GitHub returned HTTP {exc.response.status_code}.'
+                if exc.response.status_code in (401, 403):
+                    detail += ' Check the token permissions for Contents and Pull requests.'
+            elif isinstance(exc, httpx.RequestError):
+                detail += ' GitHub could not be reached.'
+            raise HTTPException(status_code=503, detail=detail + ' The update is not confirmed.')
     row = user_venues.append_and_upsert(extracted, body.url, diverged)
-    return _serialize(row)
+    return {**_serialize(row), "review_url": review_url}
 
 
 @app.get("/api/health")
 def health():
     return {"ok": True}
+
+
+@app.get("/api/refresh-status")
+def refresh_status():
+    from .scheduler import status
+    return dict(status)
+
+
+@app.get("/api/official-checks")
+def official_checks(db: Session = Depends(get_db)):
+    from .models import OfficialCheck
+    return [{"acronym": check.acronym, "year": check.year, "url": check.url,
+             "checked_at": check.checked_at.isoformat() + "Z" if check.checked_at else None,
+             "verified_at": check.verified_at.isoformat() + "Z" if check.verified_at else None,
+             "error": check.error}
+            for check in db.query(OfficialCheck).order_by(OfficialCheck.checked_at.desc()).all()]

@@ -2,9 +2,8 @@
 # After pushing to GitHub, go to https://dashboard.render.com → New → Blueprint,
 # point it at the repo, and Render will create the service from this file.
 #
-# Pricing: plan=free is genuinely $0/month. Instance sleeps after 15 min idle
-# and disk is ephemeral (wiped on every restart), so we rebuild the DB on
-# startup via `app.refresh`. Cold-start latency is roughly 60 seconds.
+# Merged venue snapshots live in Git. The runtime database is rebuilt in the
+# background on startup. Scheduled official-page checks run in GitHub Actions.
 
 services:
   - type: web
@@ -13,11 +12,27 @@ services:
     plan: free
     region: frankfurt        # closest free region for Switzerland; switch to oregon/singapore if elsewhere
     rootDir: backend
-    buildCommand: pip install -r requirements.txt
-    startCommand: python -m app.refresh && uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    buildCommand: pip install -r requirements.txt && python -m playwright install chromium
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
     healthCheckPath: /api/health
+    # This free blueprint has ephemeral storage. For durable user additions,
+    # mount persistent storage and set CONFERENCE_FINDER_DATA_DIR to its path.
     envVars:
+      - key: CONFERENCE_FINDER_REFRESH_HOURS
+        value: "6"
       - key: PYTHON_VERSION
         value: "3.12.4"
+      - key: PLAYWRIGHT_BROWSERS_PATH
+        value: "0"
+      - key: CONFERENCE_FINDER_OFFICIAL_ENABLED
+        value: "0"
+      - key: CONFERENCE_FINDER_GITHUB_REPO
+        value: "benjirer/conference-finder"
+      - key: CONFERENCE_FINDER_GITHUB_TOKEN
+        sync: false
+      - key: CONFERENCE_FINDER_OFFICIAL_HOURS
+        value: "24"
+      - key: CONFERENCE_FINDER_OFFICIAL_LIMIT
+        value: "0"
       - key: ANTHROPIC_API_KEY
-        sync: false           # set this manually in the Render dashboard if you want LLM-extract / Add-venue
+        sync: false           # set this manually in the Render dashboard for official-page checks and Add venue

@@ -30,6 +30,9 @@ def temp_db(tmp_path, monkeypatch):
 
     db_file = tmp_path / "test.db"
     monkeypatch.setenv("CONFERENCE_FINDER_NO_DESTRUCTIVE", "0")
+    monkeypatch.setenv("CONFERENCE_FINDER_REFRESH_HOURS", "0")
+    monkeypatch.delenv("GITHUB_TOKEN", raising=False)
+    monkeypatch.delenv("CONFERENCE_FINDER_GITHUB_TOKEN", raising=False)
 
     new_engine = create_engine(
         f"sqlite:///{db_file}", connect_args={"check_same_thread": False},

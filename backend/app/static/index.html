@@ -51,6 +51,7 @@
             <path d="M18 6 6 18M6 6l12 12"/>
           </svg>
         </button>
+        <button class="subscribe-secondary" id="data-status-btn">Data status</button>
         <button class="subscribe-secondary" id="add-btn">+ Add venue</button>
         <button class="subscribe-secondary" id="subscribe-btn">Subscribe to calendar</button>
       </div>
@@ -197,15 +198,24 @@
     </div>
   </div>
 
+  <div class="modal-backdrop" id="data-status-modal" style="display:none;">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="data-status-title" style="max-width:820px;">
+      <h3 id="data-status-title">Data status</h3>
+      <p class="muted" id="data-status-summary"></p>
+      <input id="data-status-search" aria-label="Filter venue checks" placeholder="Search venue or status…" style="width:100%;margin-bottom:12px;" />
+      <div id="data-status-list" style="max-height:55vh;overflow-y:auto;"></div>
+      <button class="close" id="data-status-close" style="margin-top:12px;">Close</button>
+    </div>
+  </div>
+
   <!-- Add-venue modal -->
   <div class="modal-backdrop" id="add-modal" style="display:none;">
     <div class="modal">
       <h3 style="margin-top:0;">Add a venue</h3>
       <p class="muted">
-        Paste a Call-for-Papers URL. Claude reads the page and extracts the venue
-        info with a two-pass agreement check. The result is appended to
-        <code style="display:inline; padding:1px 4px;">backend/data/user_added.yaml</code>
-        and shown in the table below.
+        Paste a Call-for-Papers URL to extract the venue and its dates.
+        When GitHub review is enabled, you’ll receive a pull request to review.
+        The venue appears in the catalogue after the proposal is merged and the data is refreshed.
       </p>
       <label class="add-label">
         CFP URL

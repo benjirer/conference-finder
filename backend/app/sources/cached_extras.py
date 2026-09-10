@@ -32,14 +32,7 @@ _DATE_FIELDS = (
 
 
 def _parse(value):
-    if value is None:
-        return None
-    if isinstance(value, datetime):
-        return value
-    try:
-        return dparser.parse(str(value))
-    except (ValueError, TypeError, OverflowError):
-        return None
+    return _common.parse_iso_date(value)
 
 
 def _fill_row(row: Conference, entry: dict) -> int:

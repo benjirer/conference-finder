@@ -6,17 +6,20 @@ file are never overwritten by auto-managed appends.
 from __future__ import annotations
 
 import json
+import os
+import tempfile
+import fcntl
+from contextlib import contextmanager
 from datetime import datetime
 from pathlib import Path
 
 import yaml
 from dateutil import parser as dparser
 
-from ..db import SessionLocal
+from ..db import SessionLocal, DATA_DIR
 from ..models import Conference
 from . import _common
 
-DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
 USER_FILE = DATA_DIR / "user_added.yaml"
 
 _DATE_FIELDS = (
@@ -37,31 +40,49 @@ def _load_yaml() -> dict:
 
 
 def _save_yaml(raw: dict) -> None:
-    USER_FILE.write_text(yaml.safe_dump(raw, sort_keys=False, allow_unicode=True))
+    USER_FILE.parent.mkdir(parents=True, exist_ok=True)
+    fd, name = tempfile.mkstemp(dir=USER_FILE.parent, suffix=".tmp")
+    try:
+        with os.fdopen(fd, "w") as stream:
+            yaml.safe_dump(raw, stream, sort_keys=False, allow_unicode=True)
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.replace(name, USER_FILE)
+    finally:
+        if os.path.exists(name):
+            os.unlink(name)
 
 
 def _parse_iso(value):
-    if value is None:
-        return None
-    if isinstance(value, datetime):
-        return value
-    try:
-        return dparser.parse(str(value))
-    except (ValueError, TypeError, OverflowError):
-        return None
+    return _common.parse_iso_date(value)
 
 
-def append_and_upsert(venue: dict, source_url: str, diverged_fields: list[str]) -> Conference:
+def append_and_upsert(venue, source_url, diverged_fields):
+    USER_FILE.parent.mkdir(parents=True, exist_ok=True)
+    with USER_FILE.with_suffix(".lock").open("a") as lock:
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        rounds = venue.get("rounds")
+        main = _append_and_upsert(venue, source_url, diverged_fields)
+        if isinstance(rounds, list):
+            for entry in rounds:
+                if isinstance(entry, dict) and isinstance(entry.get("round"), int) and entry["round"] > 1:
+                    _append_and_upsert({**venue, **entry}, source_url, diverged_fields)
+        return main
+
+
+def _append_and_upsert(venue: dict, source_url: str, diverged_fields: list[str]) -> Conference:
     """Append venue dict to user_added.yaml and upsert into DB. Returns the row.
 
     `venue` is expected to contain LLM-extracted fields (acronym, name, year, ...).
     Diverged fields are recorded in `notes` for the user to review.
     """
+    venue = {**venue, "acronym": _common.canonical_acronym(venue.get("acronym"))}
     raw = _load_yaml()
     # Avoid YAML duplicates on the same acronym/year.
     raw["venues"] = [v for v in raw["venues"]
                      if not (v.get("acronym") == venue.get("acronym")
-                             and v.get("year") == venue.get("year"))]
+                             and v.get("year") == venue.get("year")
+                             and (v.get("round") or 1) == (venue.get("round") or 1))]
     raw["venues"].append({**venue, "cfp_url": source_url})
     _save_yaml(raw)
 
@@ -71,14 +92,14 @@ def append_and_upsert(venue: dict, source_url: str, diverged_fields: list[str]) 
     with SessionLocal() as db:
         row = (
             db.query(Conference)
-            .filter_by(acronym=canon, year=venue.get("year"), round=1)
+            .filter_by(acronym=canon, year=venue.get("year"), round=venue.get("round") or 1)
             .one_or_none()
         )
         if row is None:
             row = Conference(
                 acronym=canon,
                 year=venue.get("year"),
-                round=1,
+                round=venue.get("round") or 1,
                 name=venue.get("name") or canon,
             )
             db.add(row)
@@ -89,8 +110,9 @@ def append_and_upsert(venue: dict, source_url: str, diverged_fields: list[str]) 
             row.areas = json.dumps(venue["areas"])
         row.is_workshop = bool(venue.get("is_workshop"))
         row.parent_venue = venue.get("parent_venue")
+        _common.promote_prediction(row)
         for f in _DATE_FIELDS:
-            if f in venue:
+            if venue.get(f) is not None:
                 setattr(row, f, _parse_iso(venue.get(f)))
         if "page_limit" in venue and venue["page_limit"] is not None:
             try:
@@ -138,16 +160,19 @@ def ingest_user_added() -> dict[str, int]:
             if "parent_venue" in v:
                 row.parent_venue = v["parent_venue"]
             for f in _DATE_FIELDS:
-                if f in v:
-                    setattr(row, f, _parse_iso(v[f]))
+                if v.get(f) is not None and (getattr(row, f) is None or row.source == "user" or row.predicted):
+                    parsed = _parse_iso(v[f])
+                    if parsed is not None:
+                        _common.promote_prediction(row)
+                        setattr(row, f, parsed)
             for f in ("page_limit", "format_notes", "tier", "location", "website", "cfp_url", "notes"):
                 if f in v and v[f] is not None:
                     setattr(row, f, v[f])
             # Only stamp the source if the row didn't already come from a more
             # authoritative ingester this run.
-            if row.source not in ("ccfddl", "llm_extract"):
+            if row.source in (None, "seed", "user", "predicted"):
                 row.source = "user"
-            row.last_verified = now
+            # Static replay does not count as fresh verification.
             upserted += 1
         db.commit()
     return {"upserted": upserted}

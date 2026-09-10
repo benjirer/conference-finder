@@ -17,8 +17,9 @@ from sqlalchemy.orm import sessionmaker, DeclarativeBase
 
 log = logging.getLogger("conference_finder")
 
-DATA_DIR = Path(__file__).resolve().parent.parent / "data"
-DATA_DIR.mkdir(exist_ok=True)
+BUNDLED_DATA_DIR = Path(__file__).resolve().parent.parent / "data"
+DATA_DIR = Path(os.environ.get("CONFERENCE_FINDER_DATA_DIR", str(BUNDLED_DATA_DIR)))
+DATA_DIR.mkdir(parents=True, exist_ok=True)
 DB_PATH = DATA_DIR / "conferences.db"
 
 engine = create_engine(
@@ -42,6 +43,7 @@ def get_db():
 
 
 _REQUIRED_COLUMNS = {
+    "date_metadata": "TEXT",
     # column_name: DDL fragment used in ALTER TABLE ... ADD COLUMN ...
     "predicted": "BOOLEAN DEFAULT 0",
     "diverged_detail": "TEXT",

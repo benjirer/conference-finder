@@ -149,6 +149,8 @@ def normalize_tier(raw) -> str | None:
 # We pick a canonical short form for each and rewrite at ingest so the
 # `(acronym, year, round)` unique key actually does its job.
 _ALIASES: dict[str, str] = {
+    "ieee/acm cgo": "CGO",
+    "acm/ieee cgo": "CGO",
     "usenix nsdi":   "NSDI",
     "usenix atc":    "ATC",
     "usenix osdi":   "OSDI",
@@ -235,41 +237,64 @@ def _tz_offset_hours(tz_str: str | None) -> int:
     return -12
 
 
-def parse_ccfddl_timestamp(s: str | None, tz_str: str | None = None) -> datetime | None:
-    if not s:
-        return None
-    s = s.strip()
-    for fmt in ("%Y-%m-%d %H:%M:%S", "%Y-%m-%d"):
-        try:
-            dt = datetime.strptime(s, fmt)
-            break
-        except ValueError:
-            continue
-    else:
-        return None
-    offset = _tz_offset_hours(tz_str)
-    return (dt - timedelta(hours=offset)).replace(tzinfo=timezone.utc).replace(tzinfo=None)
+def to_utc(dt: datetime, tz_str: str | None = None) -> datetime:
+    """Normalize offsets and IANA timezones before SQLite drops tzinfo."""
+    from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
+    if dt.tzinfo is None:
+        name = (tz_str or "UTC-12").strip()
+        if name.upper() in {"AOE", "ANYWHERE ON EARTH"}:
+            name = "UTC-12"
+        match = re.fullmatch(r"(?:UTC|GMT)?([+-])(\d{1,2})(?::(\d{2}))?", name, re.I)
+        if match:
+            minutes = int(match[2]) * 60 + int(match[3] or 0)
+            zone = timezone(timedelta(minutes=minutes * (1 if match[1] == "+" else -1)))
+        else:
+            try:
+                zone = ZoneInfo(name)
+            except (ZoneInfoNotFoundError, ValueError):
+                raise ValueError(f"Unknown timezone: {name}")
+        dt = dt.replace(tzinfo=zone)
+    return dt.astimezone(timezone.utc).replace(tzinfo=None)
 
 
-def parse_iso_date(s: str | None) -> datetime | None:
-    if not s:
+def parse_ccfddl_timestamp(s, tz_str: str | None = None) -> datetime | None:
+    dt = parse_iso_date(s, normalize=False)
+    if dt is None:
         return None
-    s = str(s).strip()
-    if not s:
+    try:
+        return to_utc(dt, tz_str)
+    except ValueError:
         return None
-    # Handle "24:00" end-of-day idiom by normalising to 23:59:59 same date.
-    s = re.sub(r"(\d{4}-\d{2}-\d{2})\s+24:00(?::00)?", r"\1 23:59:59", s)
-    for fmt in ("%Y-%m-%d", "%Y-%m-%d %H:%M:%S", "%Y-%m-%dT%H:%M:%S", "%Y-%m-%d %H:%M"):
-        try:
-            return datetime.strptime(s, fmt)
-        except ValueError:
-            continue
-    # Fall back to fuzzy parsing.
+
+
+def parse_iso_date(s, *, normalize=True) -> datetime | None:
+    if s is None or s == "":
+        return None
+    value = str(s).strip()
+    # Never let dateutil silently invent the current year/month/day.
+    if not re.search(r"\b\d{4}\b", value):
+        return None
+    value = re.sub(r"(\d{4}-\d{2}-\d{2})[ T]24:00(?::00)?", r"\1 23:59:59", value)
     try:
         from dateutil import parser as dparser
-        return dparser.parse(s)
+        # Different defaults expose incomplete dates without rejecting prose dates.
+        dt = dparser.parse(value, default=datetime(2000, 1, 1))
+        other = dparser.parse(value, default=datetime(2000, 2, 2))
+        if dt != other:
+            return None
+        return to_utc(dt, "UTC") if normalize else dt
     except (ValueError, TypeError, OverflowError):
         return None
+
+
+def promote_prediction(row):
+    """Remove all estimated dates before accepting a real edition."""
+    if row.predicted:
+        for field in ("abstract_deadline", "submission_deadline", "notification_date",
+                      "camera_ready", "conference_start", "conference_end"):
+            setattr(row, field, None)
+        row.predicted = False
+        row.notes = None
 
 
 def parse_date_range(date_str: str | None, year: int) -> tuple[datetime | None, datetime | None]:
@@ -277,7 +302,18 @@ def parse_date_range(date_str: str | None, year: int) -> tuple[datetime | None, 
     if not date_str:
         return None, None
     from dateutil import parser as dparser
-    s = date_str.strip()
+    s = str(date_str).strip()
+    # Day-first ranges, common on European conference websites.
+    match = re.fullmatch(r"(\d{1,2})\s*[-–]\s*(\d{1,2})\s+([A-Za-z]+)[,\s]+(\d{4})", s)
+    if match:
+        try:
+            return (dparser.parse(f"{match[1]} {match[3]} {match[4]}"),
+                    dparser.parse(f"{match[2]} {match[3]} {match[4]}"))
+        except ValueError:
+            return None, None
+    match = re.fullmatch(r"(\d{4}-\d{2}-\d{2})\s*(?:to|[-–])\s*(\d{4}-\d{2}-\d{2})", s)
+    if match:
+        return parse_iso_date(match[1]), parse_iso_date(match[2])
     m = re.match(r"^([A-Za-z]+)\s+(\d+)\s*[-–]\s*(\d+)[,\s]+(\d{4})", s)
     if m:
         month, d1, d2, yr = m.group(1), int(m.group(2)), int(m.group(3)), int(m.group(4))
@@ -380,6 +416,21 @@ def upsert_conference_secondary(
     acronym = canonical_acronym(acronym)
     row = db.query(Conference).filter_by(acronym=acronym, year=year, round=round).one_or_none()
     if row is not None:
+        priority = {"confsearch": 0, "noise-lab": 1, "klb2": 2,
+                    "ds-deadlines": 3, "aideadlines": 4}
+        if row.predicted or priority.get(source_name, -1) >= priority.get(row.source, 99):
+            promote_prediction(row)
+            for field, value in {
+                "submission_deadline": submission_deadline,
+                "abstract_deadline": abstract_deadline,
+                "notification_date": notification_date,
+                "conference_start": conference_start, "conference_end": conference_end,
+                "website": website, "cfp_url": cfp_url, "location": location,
+            }.items():
+                if value is not None:
+                    setattr(row, field, value)
+            row.source = source_name
+            row.last_verified = utc_now()
         # Existing row — don't overwrite the canonical source's data, but
         # backfill any field that's still null. Lets confsearch contribute
         # notification dates to a ccfddl-claimed row, aideadlines contribute
@@ -389,6 +440,8 @@ def upsert_conference_secondary(
             row.tier = new_tier
         if row.h5_index is None and h5_index is not None:
             row.h5_index = h5_index
+        if row.submission_deadline is None and submission_deadline is not None:
+            row.submission_deadline = submission_deadline
         if row.abstract_deadline is None and abstract_deadline is not None:
             row.abstract_deadline = abstract_deadline
         if row.notification_date is None and notification_date is not None:

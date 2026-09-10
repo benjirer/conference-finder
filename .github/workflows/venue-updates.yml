@@ -1,0 +1,42 @@
+name: Review venue updates
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 */6 * * *'
+permissions:
+  contents: write
+  pull-requests: write
+concurrency:
+  group: venue-data-refresh
+  cancel-in-progress: false
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      CONFERENCE_FINDER_GITHUB_REPO: ${{ github.repository }}
+      CONFERENCE_FINDER_DATA_DIR: ${{ github.workspace }}/runtime-data
+      CONFERENCE_FINDER_EXTRACTION_LIMIT: '100'
+      CONFERENCE_FINDER_REFRESH_REPORT: ${{ github.workspace }}/refresh-report.json
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/cache@v4
+        with:
+          path: runtime-data
+          key: venue-state-${{ github.run_id }}
+          restore-keys: venue-state-
+      - run: pip install -r backend/requirements.txt
+      - run: python -m playwright install --with-deps chromium
+      - run: python -m app.refresh
+        working-directory: backend
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: venue-refresh-report
+          path: refresh-report.json
+          if-no-files-found: ignore
