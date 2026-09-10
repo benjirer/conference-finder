@@ -459,6 +459,10 @@ def add_venue(body: AddVenueIn, request: Request):
     Rate-limited per client IP (5/hour) and URL-validated to prevent token-burn
     abuse on the public Render deployment.
     """
+    from . import review_updates
+    import os
+    if os.environ.get('RENDER') and not review_updates.enabled():
+        raise HTTPException(status_code=503, detail='Venue review is not configured on this server. Set CONFERENCE_FINDER_GITHUB_TOKEN to save additions as reviewable pull requests.')
     _enforce_add_venue_rate_limit(request)
     url = _validate_cfp_url(body.url)
     extracted = llm_extract.extract_full_venue(url, body.area_hints or [])

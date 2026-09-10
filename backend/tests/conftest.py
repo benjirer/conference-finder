@@ -50,6 +50,8 @@ def temp_db(tmp_path, monkeypatch):
         if getattr(mod, "SessionLocal", None) is not None and mod is not db_mod:
             monkeypatch.setattr(mod, "SessionLocal", new_session_local)
 
+    from app.sources import user_venues
+    monkeypatch.setattr(user_venues, 'USER_FILE', tmp_path / 'user_added.yaml')
     yield db_file
 
 

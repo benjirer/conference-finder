@@ -166,9 +166,9 @@ using Actions. GitHub scheduling is not a precise timer.
 
 `python backend/scripts/check_live_pages.py` checks public HTML/PDF retrieval.
 `python backend/scripts/check_live_extraction.py` uses the API key to compare
-extracted dates from two real CFPs against manually checked values. Neither
+extracted dates from three real CFPs (including CGO submission rounds) against manually checked values. Neither
 command modifies venue data or creates PRs. Unit tests use mocked API responses;
-live scripts must be run separately.
+live scripts must be run separately. `check_browser_and_scanned_pdf.py` exercises a real isolated browser and a scanned-PDF fixture; `--app` verifies the Data status dialog and recheck form. Set `CONFERENCE_FINDER_BROWSER_EXECUTABLE` to use an existing compatible Chrome executable instead of Playwright’s downloaded browser.
 
 ## Setup
 

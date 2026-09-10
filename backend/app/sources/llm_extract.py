@@ -303,7 +303,16 @@ Keys:
   conference_end       ISO date
   page_limit      (integer, main paper, excluding references)
   location        (city, country)
-  rounds          array or null (only if multi-round venue)
+  rounds          array or null (only if multiple independent full-paper submission rounds)
+                  Each element MUST have an integer "round" (1, 2, ... in chronological
+                  submission order) and these date keys (null when not stated):
+                  {{"round": 1, "abstract_deadline": null, "submission_deadline": "YYYY-MM-DD",
+                    "notification_date": null, "camera_ready": null}}
+                  Do NOT create rounds for artifact evaluation, author rebuttals,
+                  invited revisions, workshops, or camera-ready deadlines.
+                  Top-level submission/notification dates must refer to round 1.
+                  If the page lists conflicting dates for the SAME field and round,
+                  return null for that field; do not choose one arbitrarily.
   withdrawn       array of date field names ONLY when the page explicitly retracts a previously announced date without a replacement. Missing dates are not withdrawn.
 
 User area hints: {hints}

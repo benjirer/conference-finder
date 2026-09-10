@@ -14,6 +14,24 @@ from pypdf import PdfWriter
 from pypdf.generic import DictionaryObject, NameObject, NumberObject, EncodedStreamObject, DecodedStreamObject
 from playwright.sync_api import sync_playwright
 
+if '--app' in sys.argv:
+    with sync_playwright() as playwright:
+        browser = playwright.chromium.launch(headless=True, executable_path=os.environ.get('CONFERENCE_FINDER_BROWSER_EXECUTABLE') or None)
+        try:
+            page = browser.new_page(viewport={'width': 1440, 'height': 1000})
+            page.goto('http://127.0.0.1:8000/', wait_until='networkidle')
+            page.get_by_role('button', name='Data status', exact=True).click()
+            page.wait_for_function("document.querySelector('#data-status-summary').textContent.includes('tracked editions')")
+            page.get_by_label('Filter venue checks').fill('CGO')
+            page.wait_for_timeout(100)
+            assert page.locator('#data-status-list').inner_text().count('CGO') >= 1
+            page.get_by_role('button', name='Recheck this venue').first.click()
+            assert page.locator('#add-url').input_value().startswith('http')
+            print(json.dumps({'data_status_dialog': True, 'venue_filter': True, 'recheck_opens_prefilled_form': True}))
+        finally:
+            browser.close()
+    sys.exit(0)
+
 fixture = '''<html><body><div id="app"></div><script>
 setTimeout(() => {document.getElementById('app').innerHTML =
 '<h1>TESTCONF 2027</h1><h2>Paper submission: October 18, 2026</h2><p>Conference: March 4–6, 2027</p>';}, 100);

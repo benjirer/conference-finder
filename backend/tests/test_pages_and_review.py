@@ -140,3 +140,11 @@ def test_failed_link_does_not_discard_main_page(monkeypatch):
         raise RuntimeError('browser unavailable')
     monkeypatch.setattr(pages, 'rendered_html', broken_browser)
     assert 'May 1, 2027' in pages.fetch_page('https://example.com')
+
+
+def test_ephemeral_production_requires_review_storage(client, monkeypatch):
+    monkeypatch.setenv('RENDER', 'true')
+    monkeypatch.setattr(review_updates, 'enabled', lambda: False)
+    response = client.post('/api/venues', json={'url': 'https://example.com/cfp'})
+    assert response.status_code == 503
+    assert 'CONFERENCE_FINDER_GITHUB_TOKEN' in response.json()['detail']
